@@ -36,14 +36,14 @@ class exec{
 
 class scope{
 	public:
-		unordered_map<int,variable *> vars = {};
+		umap<int,variable *> vars
 		scope * parent_scope;
 		scope(scope * parent){
 
 		}
 
-		void new_var(variable * value){
-			// this->vars.insert({name,value});
+		void new_var(int name, variable * value){
+			this->vars[name] = value;
 		}
 
 		variable * get_var(int address){

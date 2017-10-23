@@ -197,6 +197,8 @@ int main(int argc, char *argv[]){
 	stack<string> opstack;
 	map<int,string> constants;
 	map<int,string> type;
+	map<string,int> variables;
+	int v_counter = 0;
 	int c_counter = 0;
 
 
