@@ -2,14 +2,14 @@
 
 
 
-##features (currently):
+## features (currently):
  - evaluate maths expressions WITHOUT variables
 
 
-##future:
+## future:
  -	everything minus what's here now :P
 
 
 
-##known bugs:
+## known bugs:
  -	everything
