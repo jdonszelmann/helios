@@ -198,32 +198,48 @@ int main(int argc, char *argv[]){
                 }
                 opstack.pop();
             }
-            else if (isvariablestart(c) && c1 == "="){
-                string s = c;
-                while(true){
-                    i++;
-                    c = infix.at(i);
-                    s += c;
-                    if (c == " " || c == "\n"){break;}              
-                }
-                postfix.push_back(instruction("assignment-variable",s));
-                if (variables.count(s)){
-                    variables[s] = v_counter;
-                    v_counter++;
-                }
-            }
             else if (isvariablestart(c)){
                 string s = c;
                 while(true){
                     i++;
                     c = infix.at(i);
-                    s += c;
-                    if (c == " " || c == "\n" || isoperator(c)){break;}  
-                    if(i == infix.size()-1){break;}            
+                    if (c == " " || c == "\n" || isoperator(c) || c=="="){break;} 
+                    s += c;             
                 }
                 i--;
-                postfix.push_back(instruction("variable",s));
+
+                if(i != infix.size()-1){
+                    i_t = i+1;
+                    c1 = " ";
+                    while(true){
+                        c1 = infix.at(i_t);
+                        i_t++;
+                        if(i_t == infix.size() - 1){break;}
+                        if(c1 != " "){break;}
+                    }
+                }
+                if(c1 == " " || c1 != "="){
+                    postfix.push_back(instruction("variable",s));
+                }else{
+                    postfix.push_back(instruction("assignment-variable",s));
+                    if (variables.count(s)){
+                        variables[s] = v_counter;
+                        v_counter++;
+                    }     
+                }
             }
+            // else if (isvariablestart(c)){
+            //     string s = c;
+            //     while(true){  
+            //         i++;
+            //         c = infix.at(i);
+            //         s += c;
+            //         if (c == " " || c == "\n" || isoperator(c) || c=="="){break;}  
+            //         if(i == infix.size()-1){break;}            
+            //     }
+            //     i--;
+            //     postfix.push_back(instruction("variable",s));
+            // }
             else{continue;}
         }
 
