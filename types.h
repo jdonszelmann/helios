@@ -41,52 +41,14 @@ class float_var: public variable{
 			return (string)"float_var";
 		}
 
-		virtual variable * _add(variable * other){
-			if(other->get_type() =="int_var"){
-
-			}
-			if(other->get_type() =="float_var"){
-				return new float_var(this->val + dynamic_cast<float_var *>(other)->val);
-			}
-		}
-		virtual variable * _sub(variable * other){
-			if(other->get_type() =="int_var"){
-				
-			}
-			if(other->get_type() =="float_var"){
-				return new float_var(this->val - dynamic_cast<float_var *>(other)->val);
-			}
-
-		}
-		virtual variable * _mul(variable * other){
-			if(other->get_type() =="int_var"){
-				
-			}
-			if(other->get_type() =="float_var"){
-				return new float_var(this->val * dynamic_cast<float_var *>(other)->val);
-			}
-		}
-		virtual variable * _div(variable * other){
-			if(other->get_type() =="int_var"){
-				return new float_var((float)this->val / (float)dynamic_cast<float_var *>(other)->val);
-			}
-			if(other->get_type() =="float_var"){
-
-			}
-		}	
-		virtual variable * _unary_neg(){
-			return new float_var(-this->val);
-		}
-
-		virtual variable * _pow(variable * other){
-			if(other->get_type() =="int_var"){
-				
-			}
-			if(other->get_type() =="float_var"){
-				return new float_var((float)pow(this->val, dynamic_cast<float_var *>(other)->val));
-			}
-		}
+		virtual variable * _add			(variable * other);
+		virtual variable * _sub			(variable * other); 
+		virtual variable * _mul			(variable * other);
+		virtual variable * _div			(variable * other);
+		virtual variable * _unary_neg	(				 );
+		virtual variable * _pow			(variable * other);
 };
+
 
 class int_var: public variable{
 	public:
@@ -102,50 +64,107 @@ class int_var: public variable{
 			return (string)"int_var";
 		}
 
-		virtual variable * _add(variable * other){
-			if(other->get_type() =="int_var"){
-				return new int_var(this->val + dynamic_cast<int_var *>(other)->val);
-			}
-			if(other->get_type() =="float_var"){
-
-			}
-		}
-		virtual variable * _sub(variable * other){
-			if(other->get_type() =="int_var"){
-				return new int_var(this->val - dynamic_cast<int_var *>(other)->val);
-			}
-			if(other->get_type() =="float_var"){
-
-			}
-		}
-		virtual variable * _mul(variable * other){
-				if(other->get_type() =="int_var"){
-				return new int_var(this->val * dynamic_cast<int_var *>(other)->val);
-			}
-			if(other->get_type() =="float_var"){
-
-			}
-			
-		}
-		virtual variable * _div(variable * other){
-			if(other->get_type() =="int_var"){
-				return new float_var((float)this->val / (float)dynamic_cast<int_var *>(other)->val);
-			}
-			if(other->get_type() =="float_var"){
-
-			}
-		}
-
-		virtual variable * _unary_neg(){
-			return new int_var(-this->val);
-		}
-
-		virtual variable * _pow(variable * other){			
-			if(other->get_type() =="int_var"){
-				return new int_var(pow(this->val,dynamic_cast<int_var *>(other)->val));
-			}
-			if(other->get_type() =="float_var"){
-				return new float_var((float)pow(this->val, dynamic_cast<float_var *>(other)->val));
-			}
-		}
+		virtual variable * _add			(variable * other);
+		virtual variable * _sub			(variable * other); 
+		virtual variable * _mul			(variable * other);
+		virtual variable * _div			(variable * other);
+		virtual variable * _unary_neg	(				 );
+		virtual variable * _pow			(variable * other);
 };
+
+
+
+variable * float_var::_add(variable * other){
+	if(other->get_type() =="int_var"){
+		return new float_var(this->val + (float)dynamic_cast<int_var *>(other)->val);
+	}
+	if(other->get_type() =="float_var"){
+		return new float_var(this->val + dynamic_cast<float_var *>(other)->val);
+	}
+}
+variable * float_var::_sub(variable * other){
+	if(other->get_type() =="int_var"){
+		return new float_var(this->val - (float)dynamic_cast<int_var *>(other)->val);
+	}
+	if(other->get_type() =="float_var"){
+		return new float_var(this->val - dynamic_cast<float_var *>(other)->val);
+	}
+
+}
+variable * float_var::_mul(variable * other){
+	if(other->get_type() =="int_var"){
+		return new float_var(this->val * (float)dynamic_cast<int_var *>(other)->val);
+	}
+	if(other->get_type() =="float_var"){
+		return new float_var(this->val * dynamic_cast<float_var *>(other)->val);
+	}
+}
+variable * float_var::_div(variable * other){
+	if(other->get_type() =="int_var"){
+		return new float_var((float)this->val / (float)dynamic_cast<int_var *>(other)->val);
+	}
+	if(other->get_type() =="float_var"){
+		return new float_var(this->val / dynamic_cast<float_var *>(other)->val);
+	}
+}	
+variable * float_var::_unary_neg(){
+	return new float_var(-this->val);
+}
+
+variable * float_var::_pow(variable * other){
+	if(other->get_type() =="int_var"){
+		return new float_var(this->val * (float)dynamic_cast<int_var *>(other)->val);
+	}
+	if(other->get_type() =="float_var"){
+		return new float_var((float)pow(this->val, dynamic_cast<float_var *>(other)->val));
+	}
+}
+
+
+
+variable * int_var::_add(variable * other){
+	if(other->get_type() =="int_var"){
+		return new int_var(this->val + dynamic_cast<int_var *>(other)->val);
+	}
+	if(other->get_type() =="float_var"){
+		return new float_var((float)this->val + dynamic_cast<float_var *>(other)->val);
+	}
+}
+variable * int_var::_sub(variable * other){
+	if(other->get_type() =="int_var"){
+		return new int_var(this->val - dynamic_cast<int_var *>(other)->val);
+	}
+	if(other->get_type() =="float_var"){
+		return new float_var((float)this->val - dynamic_cast<float_var *>(other)->val);
+	}
+}
+variable * int_var::_mul(variable * other){
+		if(other->get_type() =="int_var"){
+		return new int_var(this->val * dynamic_cast<int_var *>(other)->val);
+	}
+	if(other->get_type() =="float_var"){
+		return new float_var((float)this->val * dynamic_cast<float_var *>(other)->val);
+	}
+	
+}
+variable * int_var::_div(variable * other){
+	if(other->get_type() =="int_var"){
+		return new float_var((float)this->val / (float)dynamic_cast<int_var *>(other)->val);
+	}
+	if(other->get_type() =="float_var"){
+		return new float_var((float)this->val / dynamic_cast<float_var *>(other)->val);
+	}
+}
+
+variable * int_var::_unary_neg(){
+	return new int_var(-this->val);
+}
+
+variable * int_var::_pow(variable * other){			
+	if(other->get_type() =="int_var"){
+		return new int_var(pow(this->val,dynamic_cast<int_var *>(other)->val));
+	}
+	if(other->get_type() =="float_var"){
+		return new float_var((float)pow(this->val, dynamic_cast<float_var *>(other)->val));
+	}
+}

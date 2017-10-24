@@ -12,6 +12,8 @@
 #define UNARY_NEG		0x0b
 #define TRUEDIV			0x0c
 #define POW				0x0d
+#define ES				0x0e
+
 
 
 

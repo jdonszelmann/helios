@@ -3,13 +3,12 @@
 
 
 ## features (currently):
- - evaluate maths expressions WITHOUT variables
+ - evaluate maths expressions with variables. currently unprintable :P
 
 
-## future:
- -	everything minus what's here now :P
-
-
+## in development:
+ -	functions
+ -	string literals
 
 ## known bugs:
- -	everything
+ -	none

@@ -4,7 +4,11 @@
 
 
 bool isinteger(string s){
-  return s.find_first_not_of( "0123456789" ) == string::npos;
+	return s.find_first_not_of( "0123456789" ) == string::npos && s != "" && s != " ";
+}
+
+bool isoperator(string s){
+	return s.find_first_not_of( "+-*/" ) == string::npos && s != "" && s != " ";
 }
 
 static bool isFloatNumber(const string& string){
