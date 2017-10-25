@@ -5,14 +5,14 @@ class variable{
 
 		}
 
-		virtual string print(){return (string)"object";}
-		virtual string get_type			(				 )=0;	 //link to error mechanics
-		virtual variable * _add			(variable * other) = 0;  //link to error mechanics
-		virtual variable * _sub			(variable * other) = 0;  //link to error mechanics
-		virtual variable * _mul			(variable * other) = 0;  //link to error mechanics
-		virtual variable * _div			(variable * other) = 0;  //link to error mechanics
-		virtual variable * _unary_neg	(				 ) = 0;  //link to error mechanics
-		virtual variable * _pow			(variable * other) = 0;  //link to error mechanics
+		virtual string print(){return (string)"object";};
+		virtual string get_type			(				 );
+		virtual variable * _add			(variable * other);
+		virtual variable * _sub			(variable * other);
+		virtual variable * _mul			(variable * other);
+		virtual variable * _div			(variable * other);
+		virtual variable * _unary_neg	(				 );
+		virtual variable * _pow			(variable * other);
 };
 
 ostream & operator<<(ostream & os, stack<variable *> my_stack) //function header
@@ -26,6 +26,55 @@ ostream & operator<<(ostream & os, stack<variable *> my_stack) //function header
     cout << "]"<<endl;
     return os; // end of function
 }
+
+class Exception: public variable{
+	public:
+		string message = "";
+		string type = "Exception";
+		
+		void raise(string message = ""){
+			if(message==""){
+				message = this->message;
+			}
+
+			cout<<this->type<<endl;
+			cout<<message<<endl;
+			exit(0);
+		};
+
+
+		Exception(string type, string message){
+			this->type = type;
+			this->message = message;
+			this->raise();
+		}
+		Exception(string message){
+			this->message = message;
+			this->raise();
+		}
+		Exception(){
+			this->raise();
+		}	
+};
+
+
+class SyntaxError: public Exception{
+	public:
+		SyntaxError(string message) 
+		: Exception("SyntaxError", message){}
+};
+
+class TypeError: public Exception{
+	public:
+		TypeError(string message) 
+		: Exception("TypeError", message){}
+};
+
+class ValueError: public Exception{
+	public:
+		ValueError(string message) 
+		: Exception("ValueError", message){}
+};
 
 class float_var: public variable{
 	public:
@@ -72,6 +121,73 @@ class int_var: public variable{
 		virtual variable * _pow			(variable * other);
 };
 
+class list_var: public variable{
+	public:
+		vector<variable *> vals;
+
+		list_var(vector<variable *> vals){
+			this->vals = vals;
+		}
+
+		virtual string print(){return (string)"list object with value: <notimplemented>";}
+
+		virtual string get_type(){
+			return (string)"list_var";
+		}
+
+		virtual variable * _add			(variable * other);
+		virtual variable * _sub			(variable * other); 
+		virtual variable * _mul			(variable * other);
+		virtual variable * _div			(variable * other);
+		virtual variable * _unary_neg	(				 );
+		virtual variable * _pow			(variable * other);
+};
+
+class function_var: public variable{
+
+
+
+};
+
+string variable::get_type			(				 ){TypeError(this->print() + string(" does not support the get_type operation"));};
+variable * variable::_add			(variable * other){TypeError(this->print() + string(" does not support the add operation"));};
+variable * variable::_sub			(variable * other){TypeError(this->print() + string(" does not support the sub operation"));};
+variable * variable::_mul			(variable * other){TypeError(this->print() + string(" does not support the mul operation"));};
+variable * variable::_div			(variable * other){TypeError(this->print() + string(" does not support the div operation"));};
+variable * variable::_unary_neg		(				 ){TypeError(this->print() + string(" does not support the unary_neg operation"));};
+variable * variable::_pow			(variable * other){TypeError(this->print() + string(" does not support the pow operation"));};
+
+
+
+variable * list_var::_add(variable * other){
+	if(other->get_type() == "list_var"){
+		list_var *other_t = dynamic_cast<list_var *>(other);
+		this->vals.reserve(this->vals.size() + other_t->vals.size());
+		this->vals.insert(this->vals.end(), other_t->vals.begin(), other_t->vals.end());
+		return this;
+	}
+	TypeError(this->print() + string("does not support the add operation on objects other than list_var"));
+}
+
+variable * list_var::_sub(variable * other){
+	TypeError(this->print() + string("does not support the sub operation"));
+}
+
+variable * list_var::_mul(variable * other){
+	TypeError(this->print() + string("does not support the mul operation"));
+}
+
+variable * list_var::_div(variable * other){
+	TypeError(this->print() + string("does not support the div operation"));
+}
+
+variable * list_var::_unary_neg(){
+	TypeError(this->print() + string("does not support the unary_neg operation"));
+}
+
+variable * list_var::_pow(variable * other){
+	TypeError(this->print() + string("does not support the pow operation"));
+}
 
 
 variable * float_var::_add(variable * other){

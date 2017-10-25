@@ -13,6 +13,7 @@ using namespace std;
 #include "./filewriter.h"
 #include "./istype.h"
 #include "./types.h"
+#include "./block.h"
 
 #include "./executer.h"
 
@@ -107,7 +108,14 @@ int main(int argc, char *argv[]){
     map<string,int> variables;
     int v_counter = 0;
     int c_counter = 0;
+    map<int,codeblock> blocks;
+    codeblock * global_block = new codeblock();
+    codeblock * current = global_block;
 
+    // vector<unsigned char> program = {ES};
+    unsigned char value;
+    stack<vector<unsigned char>> vars;
+    // map<int,variable *> constants_new;
 
     if(argc < 2){
         cout << "no input file provided" <<endl;
@@ -133,8 +141,8 @@ int main(int argc, char *argv[]){
                 c1 = " ";
                 while(true){
                     c1 = infix.at(i_t);
-                    i_t++;
                     if(i_t == infix.size() - 1){break;}
+                    i_t++;
                     if(c1 != " "){break;}
                 }
             } 
@@ -181,6 +189,13 @@ int main(int argc, char *argv[]){
 
                 i--;
             }
+            else if (c == "["                                                    ){
+                
+
+
+                
+            }
+            else if (c == ";"                                                    ){continue;}
             else if (c == "="                                                    ){rem(&postfix,&opstack,"assignment");      opstack.push(instruction("assignment"));    }
             else if (c == "=="                                                   ){rem(&postfix,&opstack,"checkequal");      opstack.push(instruction("checkequal"));    }
             else if (c == "-" && !isinteger(c_1) && (isinteger(c1) || c1 == "(") ){rem(&postfix,&opstack,"unary_neg" );      opstack.push(instruction("unary_neg"));     }
@@ -218,7 +233,22 @@ int main(int argc, char *argv[]){
                         if(c1 != " "){break;}
                     }
                 }
-                if(c1 == " " || c1 != "="){
+
+                if(c1 == "("){
+                    rem(&postfix,&opstack,"call"       );
+                    opstack.push(instruction("call"));
+
+
+
+                }
+
+                // if(s == "function"){
+                //     current = current->add_codeblock()
+                //     //
+
+
+                // }
+                else if(c1 == " " || c1 != "="){
                     postfix.push_back(instruction("variable",s));
                 }else{
                     postfix.push_back(instruction("assignment-variable",s));
@@ -228,18 +258,6 @@ int main(int argc, char *argv[]){
                     }     
                 }
             }
-            // else if (isvariablestart(c)){
-            //     string s = c;
-            //     while(true){  
-            //         i++;
-            //         c = infix.at(i);
-            //         s += c;
-            //         if (c == " " || c == "\n" || isoperator(c) || c=="="){break;}  
-            //         if(i == infix.size()-1){break;}            
-            //     }
-            //     i--;
-            //     postfix.push_back(instruction("variable",s));
-            // }
             else{continue;}
         }
 
@@ -258,72 +276,74 @@ int main(int argc, char *argv[]){
         for (auto& t :  postfix)
             cout << t.type << " " << t.value << "; ";
         cout<<endl;
-    }
-    vector<unsigned char> program = {ES};
-    unsigned char value;
-    stack<vector<unsigned char>> vars;
 
-    for(auto& i:postfix){
-             if (i.type == "assignment"  ){  
-                program.push_back(SV);
-                program.push_back(vars.top().at(0));
-                program.push_back(vars.top().at(1));
-                program.push_back(vars.top().at(2));
-                program.push_back(vars.top().at(3));
-                vars.pop();     
+        for(auto& i:postfix){
+
+            if (i.type == "assignment"  ){  
+                    current->add_instruction(SV);
+                    current->add_instruction(vars.top().at(0));
+                    current->add_instruction(vars.top().at(1));
+                    current->add_instruction(vars.top().at(2));
+                    current->add_instruction(vars.top().at(3));
+                    vars.pop();     
+                }
+            else if (i.type == "assignment-variable"){
+                vector<unsigned char> var;
+                value = variables[i.value];
+
+                var.push_back((value >> 24) & 0xFF);
+                var.push_back((value >> 16) & 0xFF);
+                var.push_back((value >> 8) & 0xFF);
+                var.push_back(value & 0xFF);
+                vars.push(var);
             }
-        else if (i.type == "assignment-variable"){
-            vector<unsigned char> var;
-            value = variables[i.value];
+            else if (i.type == "variable"){
+                current->add_instruction(LV);
+                value = variables[i.value];
 
-            var.push_back((value >> 24) & 0xFF);
-            var.push_back((value >> 16) & 0xFF);
-            var.push_back((value >> 8) & 0xFF);
-            var.push_back(value & 0xFF);
-            vars.push(var);
-        }
-        else if (i.type == "variable"){
-            program.push_back(LV);
-            value = variables[i.value];
+                current->add_instruction((value >> 24) & 0xFF);
+                current->add_instruction((value >> 16) & 0xFF);
+                current->add_instruction((value >> 8) & 0xFF);
+                current->add_instruction(value & 0xFF);
+            }
+            else if (i.type == "add"         ){  current->add_instruction(ADD);         }
+            else if (i.type == "sub"         ){  current->add_instruction(SUB);         }
+            else if (i.type == "mul"         ){  current->add_instruction(MUL);         }
+            else if (i.type == "div"         ){  current->add_instruction(DIV);         }
+            else if (i.type == "unary_neg"   ){  current->add_instruction(UNARY_NEG);   }
+            else if (i.type == "truediv"     ){  current->add_instruction(TRUEDIV);     }
+            else if (i.type == "pow"         ){  current->add_instruction(POW);         }
+            else {
+                current->add_instruction(LC);
+                value = (unsigned char)atoi(i.value.c_str());
+                current->add_instruction((value >> 24) & 0xFF);
+                current->add_instruction((value >> 16) & 0xFF);
+                current->add_instruction((value >> 8) & 0xFF);
+                current->add_instruction(value & 0xFF);
+            }
+           
 
-            program.push_back((value >> 24) & 0xFF);
-            program.push_back((value >> 16) & 0xFF);
-            program.push_back((value >> 8) & 0xFF);
-            program.push_back(value & 0xFF);
         }
-        else if (i.type == "add"         ){  program.push_back(ADD);         }
-        else if (i.type == "sub"         ){  program.push_back(SUB);         }
-        else if (i.type == "mul"         ){  program.push_back(MUL);         }
-        else if (i.type == "div"         ){  program.push_back(DIV);         }
-        else if (i.type == "unary_neg"   ){  program.push_back(UNARY_NEG);   }
-        else if (i.type == "truediv"     ){  program.push_back(TRUEDIV);     }
-        else if (i.type == "pow"         ){  program.push_back(POW);         }
-        else {
-            program.push_back(LC);
-            value = (unsigned char)atoi(i.value.c_str());
-            program.push_back((value >> 24) & 0xFF);
-            program.push_back((value >> 16) & 0xFF);
-            program.push_back((value >> 8) & 0xFF);
-            program.push_back(value & 0xFF);
+
+        for(auto& i : constants){
+            if(type[i.first] == "float"){
+                current->add_constant(i.first,new float_var(stof(i.second)));
+            }
+            else if(type[i.first] == "int"){
+                current->add_constant(i.first,new int_var(atoi(i.second.c_str())));
+            }
         }
+
+        postfix.clear();
+        constants.clear();
+
+        for (auto& t : global_block->code)
+            cout << to_string(t) << "; ";
+        cout<<endl;
+
     }
-    program.push_back(STP);
-
-    map<int,variable *> constants_new;
-    for(auto& i : constants){
-        if(type[i.first] == "float"){
-            constants_new[i.first] = new float_var(stof(i.second));
-        }
-        else if(type[i.first] == "int"){
-            constants_new[i.first] = new int_var(atoi(i.second.c_str()));
-        }
-    }
-
-    for (auto& t :  program)
-        cout << to_string(t) << "; ";
-    cout<<endl;           
-
-    execute(program,constants_new);
+    global_block->add_instruction(STP);        
+    execute(global_block);
 }
 
 

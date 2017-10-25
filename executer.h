@@ -68,7 +68,12 @@ class Scopes{
 		}
 
 		scope * current(){
-			return this->scopes.top();
+			if (!this->scopes.empty()){
+				return this->scopes.top();
+			}else{
+				this->enter_scope();
+				return this->scopes.top();	
+			}
 		}
 
 		void enter_scope(){
@@ -101,7 +106,10 @@ int concat(vector<int> vals){
 	return val;
 }
 
-void execute(vector<unsigned char> program, map<int,variable*> constants){
+void execute(codeblock* block){
+
+	vector<unsigned char> program = block->code;
+	map<int,variable*> constants = block->constants;
 
 	exec executor = exec(program);
 	Scopes * scopes = new Scopes();
@@ -138,6 +146,10 @@ void execute(vector<unsigned char> program, map<int,variable*> constants){
 			}
 
 			case SV:{
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
+
 				vector<int> args;
 				for (int i = 0; i < 4 ; ++i)
 				{
@@ -151,8 +163,15 @@ void execute(vector<unsigned char> program, map<int,variable*> constants){
 			}
 
 			case ADD:{
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
+
 				variable * temp1 = frame.top();
 				frame.pop();
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
 				variable * temp2 = frame.top();
 				frame.pop();
 				frame.push(temp2->_add(temp1));
@@ -160,8 +179,15 @@ void execute(vector<unsigned char> program, map<int,variable*> constants){
 			}
 
 			case SUB:{
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
+
 				variable * temp1 = frame.top();
 				frame.pop();
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
 				variable * temp2 = frame.top();
 				frame.pop();
 				frame.push(temp2->_sub(temp1));
@@ -169,8 +195,15 @@ void execute(vector<unsigned char> program, map<int,variable*> constants){
 			}
 
 			case POW:{
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
+
 				variable * temp1 = frame.top();
 				frame.pop();
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
 				variable * temp2 = frame.top();
 				frame.pop();
 				frame.push(temp2->_pow(temp1));
@@ -178,8 +211,15 @@ void execute(vector<unsigned char> program, map<int,variable*> constants){
 			}
 			
 			case DIV:{
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
+
 				variable * temp1 = frame.top();
 				frame.pop();
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
 				variable * temp2 = frame.top();
 				frame.pop();
 				frame.push(temp2->_div(temp1));
@@ -187,8 +227,15 @@ void execute(vector<unsigned char> program, map<int,variable*> constants){
 			}
 			
 			case MUL:{
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
+
 				variable * temp1 = frame.top();
 				frame.pop();
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
 				variable * temp2 = frame.top();
 				frame.pop();
 				frame.push(temp2->_mul(temp1));
@@ -196,6 +243,10 @@ void execute(vector<unsigned char> program, map<int,variable*> constants){
 			}
 
 			case UNARY_NEG:{
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
+
 				variable * temp1 = frame.top();
 				frame.pop();
 				frame.push(temp1->_unary_neg());
@@ -220,7 +271,7 @@ void execute(vector<unsigned char> program, map<int,variable*> constants){
 				break;
 			}
 
-			default:{cout<<"ERROR"<<endl;break;}
+			default:{new SyntaxError("invalid token");break;}
 		}
 	}
 }
