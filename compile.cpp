@@ -174,7 +174,7 @@ int main(int argc, char *argv[]){
                     if(i != infix.size()-1){c1 = infix.at(i+1);} 
                     
                     if(i > 0){c_1 = infix.at(i-1);}
-                    if(isinteger(c) || (c == "." && isinteger(c_1) && isinteger(c1)) && c != " "){
+                    if(isinteger(c) || ((c == "." && isinteger(c_1) && isinteger(c1)) && c != " ")){
                         s += c;
                     }else{
                         i--;

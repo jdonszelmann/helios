@@ -149,13 +149,13 @@ class function_var: public variable{
 
 };
 
-string variable::get_type			(				 ){TypeError(this->print() + string(" does not support the get_type operation"));};
-variable * variable::_add			(variable * other){TypeError(this->print() + string(" does not support the add operation"));};
-variable * variable::_sub			(variable * other){TypeError(this->print() + string(" does not support the sub operation"));};
-variable * variable::_mul			(variable * other){TypeError(this->print() + string(" does not support the mul operation"));};
-variable * variable::_div			(variable * other){TypeError(this->print() + string(" does not support the div operation"));};
-variable * variable::_unary_neg		(				 ){TypeError(this->print() + string(" does not support the unary_neg operation"));};
-variable * variable::_pow			(variable * other){TypeError(this->print() + string(" does not support the pow operation"));};
+string variable::get_type			(				 ){TypeError(this->print() + string(" does not support the get_type operation")); return NULL;};
+variable * variable::_add			(variable * other){TypeError(this->print() + string(" does not support the add operation")); return NULL;};
+variable * variable::_sub			(variable * other){TypeError(this->print() + string(" does not support the sub operation")); return NULL;};
+variable * variable::_mul			(variable * other){TypeError(this->print() + string(" does not support the mul operation")); return NULL;};
+variable * variable::_div			(variable * other){TypeError(this->print() + string(" does not support the div operation")); return NULL;};
+variable * variable::_unary_neg		(				 ){TypeError(this->print() + string(" does not support the unary_neg operation")); return NULL;};
+variable * variable::_pow			(variable * other){TypeError(this->print() + string(" does not support the pow operation")); return NULL;};
 
 
 
@@ -167,26 +167,32 @@ variable * list_var::_add(variable * other){
 		return this;
 	}
 	TypeError(this->print() + string("does not support the add operation on objects other than list_var"));
+	return NULL;
 }
 
 variable * list_var::_sub(variable * other){
 	TypeError(this->print() + string("does not support the sub operation"));
+	return NULL;
 }
 
 variable * list_var::_mul(variable * other){
 	TypeError(this->print() + string("does not support the mul operation"));
+	return NULL;
 }
 
 variable * list_var::_div(variable * other){
 	TypeError(this->print() + string("does not support the div operation"));
+	return NULL;
 }
 
 variable * list_var::_unary_neg(){
 	TypeError(this->print() + string("does not support the unary_neg operation"));
+	return NULL;
 }
 
 variable * list_var::_pow(variable * other){
 	TypeError(this->print() + string("does not support the pow operation"));
+	return NULL;
 }
 
 
@@ -197,6 +203,7 @@ variable * float_var::_add(variable * other){
 	if(other->get_type() =="float_var"){
 		return new float_var(this->val + dynamic_cast<float_var *>(other)->val);
 	}
+	return NULL;
 }
 variable * float_var::_sub(variable * other){
 	if(other->get_type() =="int_var"){
@@ -205,7 +212,7 @@ variable * float_var::_sub(variable * other){
 	if(other->get_type() =="float_var"){
 		return new float_var(this->val - dynamic_cast<float_var *>(other)->val);
 	}
-
+	return NULL;
 }
 variable * float_var::_mul(variable * other){
 	if(other->get_type() =="int_var"){
@@ -214,6 +221,7 @@ variable * float_var::_mul(variable * other){
 	if(other->get_type() =="float_var"){
 		return new float_var(this->val * dynamic_cast<float_var *>(other)->val);
 	}
+	return NULL;
 }
 variable * float_var::_div(variable * other){
 	if(other->get_type() =="int_var"){
@@ -222,6 +230,7 @@ variable * float_var::_div(variable * other){
 	if(other->get_type() =="float_var"){
 		return new float_var(this->val / dynamic_cast<float_var *>(other)->val);
 	}
+	return NULL;
 }	
 variable * float_var::_unary_neg(){
 	return new float_var(-this->val);
@@ -234,6 +243,7 @@ variable * float_var::_pow(variable * other){
 	if(other->get_type() =="float_var"){
 		return new float_var((float)pow(this->val, dynamic_cast<float_var *>(other)->val));
 	}
+	return NULL;
 }
 
 
@@ -245,6 +255,7 @@ variable * int_var::_add(variable * other){
 	if(other->get_type() =="float_var"){
 		return new float_var((float)this->val + dynamic_cast<float_var *>(other)->val);
 	}
+	return NULL;
 }
 variable * int_var::_sub(variable * other){
 	if(other->get_type() =="int_var"){
@@ -253,6 +264,7 @@ variable * int_var::_sub(variable * other){
 	if(other->get_type() =="float_var"){
 		return new float_var((float)this->val - dynamic_cast<float_var *>(other)->val);
 	}
+	return NULL;
 }
 variable * int_var::_mul(variable * other){
 		if(other->get_type() =="int_var"){
@@ -261,7 +273,7 @@ variable * int_var::_mul(variable * other){
 	if(other->get_type() =="float_var"){
 		return new float_var((float)this->val * dynamic_cast<float_var *>(other)->val);
 	}
-	
+	return NULL;	
 }
 variable * int_var::_div(variable * other){
 	if(other->get_type() =="int_var"){
@@ -270,6 +282,7 @@ variable * int_var::_div(variable * other){
 	if(other->get_type() =="float_var"){
 		return new float_var((float)this->val / dynamic_cast<float_var *>(other)->val);
 	}
+	return NULL;
 }
 
 variable * int_var::_unary_neg(){
@@ -283,4 +296,7 @@ variable * int_var::_pow(variable * other){
 	if(other->get_type() =="float_var"){
 		return new float_var((float)pow(this->val, dynamic_cast<float_var *>(other)->val));
 	}
+	return NULL;
 }
+
+
