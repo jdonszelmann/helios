@@ -16,6 +16,6 @@
 
  ## usage:
  -	download this folder
- -	compile "compile.cpp" in some way (preferably gcc)
- -	run the resulting executable with as first argument a file it should run. many errors may occur for there is no exception system (yet)
- (tested on windows only sofar.)  
+ -	compile "compile.cpp" (cd to the directory and use the [make] command)
+ -	run the resulting executable with as first argument a file it should run.
+ -  for windows try compiling it with g++ (mingw)
