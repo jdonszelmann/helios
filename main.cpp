@@ -7,6 +7,7 @@ using namespace std;
 
 #include "tools.h"
 #include "filereader.h"
+#include "lexer.h"
 
 
 int main(int argc, char *argv[]){
@@ -14,10 +15,12 @@ int main(int argc, char *argv[]){
         cout << "no input file provided" <<endl;
         return 0;
     }
+    lexer::GEN_LANGSPEC(spec);
 	filereader * reader = new filereader(argv[1]);
 	while(!reader->eof){
-		for(auto& i:split_string(reader->next(),";")){
+		for(auto& i:split(reader->next(),";")){
 			cout<<i<<endl;
+			lexer::decode(i);
 		}
 	}
 }

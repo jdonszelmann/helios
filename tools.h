@@ -1,37 +1,30 @@
+#include <sstream>
 
 
+vector<string> split(string str, string token){
+    vector<string>result;
+    while(str.size()){
+        int index = str.find(token);
+        if(index!=string::npos){
+            result.push_back(str.substr(0,index));
+            str = str.substr(index+token.size());
+            if(str.size()==0)result.push_back(str);
+        }else{
+            result.push_back(str);
+            str = "";
+        }
+    }
+    return result;
+}
 
-vector<string> split_string(string str, string delimitor){
-	char s,d;
-	bool Match;
-	int indexdiff;
-	vector<string> result;
-	string substr = "";
-	for (int i = 0; i < str.size(); ++i)
-	{
-		indexdiff = 0;
-		Match = true;
-		for (int j = 0; j < delimitor.size(); ++i)
-		{
-			if(indexdiff+i < str.size()){
-				s = str[i + indexdiff];
-				cout<<s<<endl;
-				d = delimitor[j];
-				if(d != s){
-					Match = false;
-					break;
-				}
-				indexdiff++;
-			}else{
-				Match = false;
-				break;
-			}
-		}
-		substr += str.substr(i,1);
-		if(Match){
-			result.push_back(substr);
-			substr = "";
-		}
-	}
-	return result;
+template <typename T>
+string join(const T& v, const string& delim) {
+    ostringstream s;
+    for (const auto& i : v) {
+        if (&i != &v[0]) {
+            s << delim;
+        }
+        s << i;
+    }
+    return s.str();
 }
