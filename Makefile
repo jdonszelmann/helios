@@ -17,7 +17,9 @@ $(EXECUTABLE): $(OBJECTS)
 run:$(SOURCES) $(EXECUTABLE)
 	./Helios test.hel
 
-
+go:
+	./Helios test.hel
+	
 clean:
 	rm $(OBJECTS)
 	rm $(EXECUTABLE) 
