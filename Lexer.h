@@ -65,15 +65,7 @@ namespace {
 	}
 
 	void
-	popuntilb(string limit){
-		while(!bracketstack.empty() && bracketstack.top() != limit){
-			output.push_back(bracketstack.top());
-			bracketstack.pop();
-		}
-	}
-
-	void
-	popuntilp(string limit){
+	popuntil(string limit){
 		while(!postfixstack.empty() && postfixstack.top() != limit){
 			output.push_back(postfixstack.top());
 			postfixstack.pop();
@@ -127,44 +119,46 @@ namespace lexer{
 			sm	= nextnotspace	(str,	i,	false	);
 	
 			//brackets closing
-					if(s == "]"											)	{		popuntilb(	"["		);									}
-			else 	if(s == "}"											)	{		popuntilb(	"{"		);									}
-			else 	if(s == ")"	&& !lastbracketwaspostfix.top()			)	{		popuntilb(	"("		);	lastbracketwaspostfix.pop();	}
-			else 	if(s == ")"	&& lastbracketwaspostfix.top()			)	{		popuntilp(	"("		);	lastbracketwaspostfix.pop();	}
-			else 	if(s == "\""										)	{		popuntilb(	"\""	);									}
+					if(s == "]"											)	{		output.push_back(bracketstack.top()); bracketstack.pop()								}
+			else 	if(s == "}"											)	{		output.push_back(bracketstack.top()); bracketstack.pop()								}
+			else 	if(s == ")"	&& !lastbracketwaspostfix.top()			)	{		output.push_back(bracketstack.top()); bracketstack.pop()	lastbracketwaspostfix.pop();}
+			else 	if(s == ")"	&& lastbracketwaspostfix.top()			)	{		popuntil(	"("		);										lastbracketwaspostfix.pop();}
+			else 	if(s == "\""										)	{		output.push_back(bracketstack.top()); bracketstack.pop()								}
 			//brackets opening
-			else 	if(s == "["											)	{		bracketstack.push(s);									}
-			else 	if(s == "{"											)	{		bracketstack.push(s);									}
-			else 	if(s == "("	&& !(isnumeric(sm) || isoperator(sm))	)	{		bracketstack.push(s); lastbracketwaspostfix.push(false);}
-			else 	if(s == "("	&&  (isnumeric(sm) || isoperator(sm))	)	{		postfixstack.push(s); lastbracketwaspostfix.push(true);	}
-			else 	if(s == "\""										)	{		bracketstack.push(s);									}
+			else 	if(s == "["											)	{		bracketstack.push(0);																	}
+			else 	if(s == "{"											)	{		bracketstack.push(0);																	}
+			else 	if(s == "("	&& !(isnumeric(sm) || isoperator(sm))	)	{		bracketstack.push(0);	lastbracketwaspostfix.push(false);								}
+			else 	if(s == "("	&&  (isnumeric(sm) || isoperator(sm))	)	{		postfixstack.push("(");	lastbracketwaspostfix.push(true);								}
+			else 	if(s == "\""										)	{		bracketstack.push(0);																	}
 			//assignment
-			else 	if(s == "=" && sp != "="							)	{		popuntilequal("=");		postfixstack.push("=");			}
+			else 	if(s == "=" && sp != "="							)	{		popuntilequal("=");		postfixstack.push("=");											}
+			//lists
+			else 	if(s == ","											)	{		bracketstack.top() += 1																	}
 			//comparison
-			else 	if(s == "=" && sp == "="							)	{i+=1; 	popuntilequal("==");	postfixstack.push("==");		}
-			else 	if(s == "!" && sp == "="							)	{i+=1; 	popuntilequal("!=");	postfixstack.push("!=");		}
-			else 	if(s == ">" && sp == "="							)	{i+=1; 	popuntilequal(">=");	postfixstack.push(">=");		}
-			else 	if(s == "<" && sp == "=" 							)	{i+=1; 	popuntilequal("<=");	postfixstack.push("<=");		}			
-			else 	if(s == ">" && sp != "="							)	{		popuntilequal(">");		postfixstack.push(">");			}
-			else 	if(s == "<" && sp != "=" 							)	{		popuntilequal("<");		postfixstack.push("<");			}			
+			else 	if(s == "=" && sp == "="							)	{i+=1; 	popuntilequal("==");	postfixstack.push("==");										}
+			else 	if(s == "!" && sp == "="							)	{i+=1; 	popuntilequal("!=");	postfixstack.push("!=");										}
+			else 	if(s == ">" && sp == "="							)	{i+=1; 	popuntilequal(">=");	postfixstack.push(">=");										}
+			else 	if(s == "<" && sp == "=" 							)	{i+=1; 	popuntilequal("<=");	postfixstack.push("<=");										}			
+			else 	if(s == ">" && sp != "="							)	{		popuntilequal(">");		postfixstack.push(">");											}
+			else 	if(s == "<" && sp != "=" 							)	{		popuntilequal("<");		postfixstack.push("<");											}			
 			// +
-			else 	if(s == "+" && sp == "+"							)	{i+=1; 	popuntilequal("++");	postfixstack.push("++");		}
-			else 	if(s == "+" && sp != "+"							)	{		popuntilequal("+");		postfixstack.push("+");			}
-			else 	if(s == "+" && sp == "="							)	{i+=1;	popuntilequal("+=");	postfixstack.push("+=");		}
+			else 	if(s == "+" && sp == "+"							)	{i+=1; 	popuntilequal("++");	postfixstack.push("++");										}
+			else 	if(s == "+" && sp != "+"							)	{		popuntilequal("+");		postfixstack.push("+");											}
+			else 	if(s == "+" && sp == "="							)	{i+=1;	popuntilequal("+=");	postfixstack.push("+=");										}
 			// -
-			else 	if(s == "-" && sp == "-"							)	{i+=1;	popuntilequal("--");	postfixstack.push("--");		}
-			else 	if(s == "-" && sp != "-"							)	{		popuntilequal("-");		postfixstack.push("-");			}
-			else 	if(s == "-" && sp == "="							)	{i+=1;	popuntilequal("-=");	postfixstack.push("-=");		}
+			else 	if(s == "-" && sp == "-"							)	{i+=1;	popuntilequal("--");	postfixstack.push("--");										}
+			else 	if(s == "-" && sp != "-"							)	{		popuntilequal("-");		postfixstack.push("-");											}
+			else 	if(s == "-" && sp == "="							)	{i+=1;	popuntilequal("-=");	postfixstack.push("-=");										}
 			// *
-			else 	if(s == "*" && sp == "*"							)	{i+=1;	popuntilequal("**");	postfixstack.push("**");		}
-			else 	if(s == "*" && sp != "*"							)	{		popuntilequal("*");		postfixstack.push("*");			}
-			else 	if(s == "*" && sp == "="							)	{i+=1;	popuntilequal("*=");	postfixstack.push("*=");		}
+			else 	if(s == "*" && sp == "*"							)	{i+=1;	popuntilequal("**");	postfixstack.push("**");										}
+			else 	if(s == "*" && sp != "*"							)	{		popuntilequal("*");		postfixstack.push("*");											}
+			else 	if(s == "*" && sp == "="							)	{i+=1;	popuntilequal("*=");	postfixstack.push("*=");										}
 			// /
-			else 	if(s == "/" && sp == "/"							)	{i+=1;	popuntilequal("//");	postfixstack.push("//");		}
-			else 	if(s == "/" && sp != "/"							)	{		popuntilequal("/");		postfixstack.push("/");			}
-			else 	if(s == "/" && sp == "="							)	{i+=1;	popuntilequal("/=");	postfixstack.push("/=");		}
-			else	if(s == " "											)	{continue;														}
-			else															{output.push_back(s);											}
+			else 	if(s == "/" && sp == "/"							)	{i+=1;	popuntilequal("//");	postfixstack.push("//");										}
+			else 	if(s == "/" && sp != "/"							)	{		popuntilequal("/");		postfixstack.push("/");											}
+			else 	if(s == "/" && sp == "="							)	{i+=1;	popuntilequal("/=");	postfixstack.push("/=");										}
+			else	if(s == " "											)	{continue;																						}
+			else															{output.push_back(s);																			}
 		}
 		while(!postfixstack.empty() && !isbracket(postfixstack.top())){
 			output.push_back(postfixstack.top());
