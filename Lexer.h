@@ -1,133 +1,132 @@
 
-namespace {
-	void __newvar__(){
+#include stack
 
-	}
-	void __newstring__(){
+stack<string> postfixstack;
+vector<string> output;
 
-	}
-}
 
 namespace {
-	class _LANGSPEC{
-		public:
-			vector<_LANGSPEC> children;
-			_LANGSPEC * parent;
-			string letter;
-			_LANGSPEC(string letter, _LANGSPEC * parent){
-				this->letter = letter;
-				this->parent = parent;
-			}
-
-			_LANGSPEC(){
-
-			}
-
-			void print(){
-				cout<<this->letter<<endl;
-				for(auto& i:this->children){
-					i.print();
-				}
-			}
-	};
-
-	class LANGSPEC{
-		public:
-			vector<LANGSPEC> children;
-			void (* function) (void);
-			string type = "";
-			string name = "";
-
-			LANGSPEC(string type, string name, vector<LANGSPEC> children){
-				// this->next = v(children, children + sizeof children / sizeof children[0]);
-				this->children = children;
-				this->type = type;
-				this->name = name;
-			}
-			LANGSPEC(string type, string name, void (*f) (void)){
-				this->function = f;
-				this->type = type;
-				this->name = name;
-			}
-
-			LANGSPEC(vector<LANGSPEC>){
-				this->children = children;
-			}
-
-
-			void print(){
-				cout<<this->name<<endl;
-				for(auto& i:this->children){
-					i.print();
-				}
-			}
-	};
-}
-_LANGSPEC * LANGUAGE_SPECIFICATION = NULL;
-_LANGSPEC * LANGUAGE_SPECIFICATION_CURRENT = NULL;
-	
-namespace lexer{
-	void decode(string line){
-		cout<<"hey"<<endl;
-		LANGUAGE_SPECIFICATION->print();
-		cout<<"hey"<<endl;
-
+	void 
+	popuntilequal(str op)
+	{
+		char index = getindex(op);
+		while(!postfixstack.empty && getindex(postfixstack.top()) <= index){
+			output.push_back(postfixstack.top())
+			postfixstack.pop()
+		}				
 	}
 
-
-	void recursive_gen(LANGSPEC spec){
-		for(auto& i:spec.children){
-
-			if(i.name != "" && i.type != ""){
-				if(i.type == "ANY"){
-					cout<<"any"<<endl;
-					for (int j = 0; j < i.name.size(); ++j)
-					{
-						string s = i.name.substr(j,1);
-						_LANGSPEC * sp = new _LANGSPEC(s,LANGUAGE_SPECIFICATION_CURRENT);
-						LANGUAGE_SPECIFICATION_CURRENT = sp;
-						recursive_gen(i);
-					}
-				}
-			}
-			if(i.type == ""){
-				recursive_gen(i);
-			}
+	void
+	popuntil(string limit){
+		while(!postfixstack.empty() && postfixstack.top() != limit){
+			output.push_back(postfixstack.top())
+			postfixstack.pop()
 		}
 	}
 
-	void GEN_LANGSPEC(LANGSPEC spec){
-		cout<<"generating langspec"<<endl;	
-		LANGUAGE_SPECIFICATION = new _LANGSPEC();
-		LANGUAGE_SPECIFICATION_CURRENT = LANGUAGE_SPECIFICATION;
-		recursive_gen(spec);
+	char 
+	getindex(str op){
+		switch(op.c_str()){
+			// assignment
+			case "=":{return 1000;}
+			// +
+			case "+":{return 30;}
+			case "++":{return 20;}
+			case "+=":{return 10;}
+			// -
+			case "-":{return 30;}
+			case "--":{return 20;}
+			case "-=":{return 10;}
+
+			// *
+			case "*":{return 31;}
+			case "**":{return 22;}
+			case "*=":{return 11;}
+
+			// /
+			case "/":{return 31;}
+			case "//":{return 31;}
+			case "/=":{return 11;}
+		}
+	}
+
+	string
+	nextnotspace(string str, int index, bool pos=true){
+		string retval = "";
+		string s
+		if(index > str.size() || index < 0){
+			return retval;
+		}
+		if(pos){
+			for 
+			(int i = index+1; i < str.size(); ++i)
+			{
+				s = string.substr(i,1);
+				if(s != " "){
+					retval = s;
+					break;
+				}
+			}	
+			return retval;
+		}else{
+			for 
+			(int i = index-1; i >= 0; i--)
+			{
+				s = string.substr(i,1);
+				if(s != " "){
+					retval = s;
+					break;
+				}
+			}	
+			return retval;
+		}
 	}
 }
 
 
-LANGSPEC variable = LANGSPEC("ANY","$_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",{
-	LANGSPEC("NOT"," \n\t\r",&__newvar__)
-});
+namespace lexer{
+	void
+	decode(string str)
+	{
+		string s, sp, sm;
+	for
+		(int i = 0; i < str.size; ++i)
+		{
+			s 	= str.substr	(		i,	1		);
+			sp	= nextnotspace	(str,	i,	true	);
+			sm	= nextnotspace	(str,	i,	false	);
 
-LANGSPEC str = LANGSPEC("EXACT","\"",{
-	LANGSPEC("NOT","\"",&__newstring__)
-});
-
-LANGSPEC spec = LANGSPEC({
-	variable,
-	str,
-});	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+			//brackets closing
+					if(s == "]"					){		popuntil(	"["		);								}
+			else 	if(s == "}"					){		popuntil(	"{"		);								}
+			else 	if(s == ")"					){		popuntil(	"("		);								}
+			else 	if(s == "\""				){		popuntil(	"\""	);								}
+			//brackets opening
+			else 	if(s == "["					){		postfixstack.push(s);								}
+			else 	if(s == "{"					){		postfixstack.push(s);								}
+			else 	if(s == "("					){		postfixstack.push(s);								}
+			else 	if(s == "\""				){		postfixstack.push(s);								}
+			//assignment
+			else 	if(s == "=" 				){		popuntilequal("=");		postfixstack.push("=");		}
+			// +
+			else 	if(s == "+" && sp == "+"	){i+=1; popuntilequal("++");	postfixstack.push("++");	}
+			else 	if(s == "+" && sp != "+"	){		popuntilequal("+");		postfixstack.push("+");		}
+			else 	if(s == "+" && sp == "="	){i+=1; popuntilequal("+=");	postfixstack.push("+=");	}
+			// -
+			else 	if(s == "-" && sp == "-"	){i+=1; popuntilequal("--");	postfixstack.push("--");	}
+			else 	if(s == "-" && sp != "-"	){		popuntilequal("-");		postfixstack.push("-");		}
+			else 	if(s == "-" && sp == "="	){i+=1; popuntilequal("-=");	postfixstack.push("-=");	}
+			// *
+			else 	if(s == "*" && sp == "*"	){i+=1; popuntilequal("**");	postfixstack.push("**");	}
+			else 	if(s == "*" && sp != "*"	){		popuntilequal("*");		postfixstack.push("*");		}
+			else 	if(s == "*" && sp == "="	){i+=1; popuntilequal("*=");	postfixstack.push("*=");	}
+			// /
+			else 	if(s == "/" && sp == "/"	){i+=1; popuntilequal("//");	postfixstack.push("//");	}
+			else 	if(s == "/" && sp != "/"	){		popuntilequal("/");		postfixstack.push("/");		}
+			else 	if(s == "/" && sp == "="	){i+=1; popuntilequal("/=");	postfixstack.push("/=");	}
+			else{
+				output.push_back(s);
+			}
+		}
+	}
+}
