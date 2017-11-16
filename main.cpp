@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
 	filereader * reader = new filereader(argv[1]);
 	while(!reader->eof){
 		for(auto& i:split(reader->next(),";")){
-			cout<<i<<endl;
+			// cout<<i<<endl;
 			lexer::decode(i);
 		}
 	}

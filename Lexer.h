@@ -1,9 +1,20 @@
 
 #include <stack>
 
+
+class instruction{
+	public:
+		string type;
+		int argument;
+		instruction(string type, int argument = 0){
+			this->type = type;
+			this->argument = argument;
+		}
+};
+
 stack<string> postfixstack;
-stack<string> bracketstack;
-vector<string> output;
+stack<int> bracketstack;
+vector<instruction *> output;
 stack<bool> lastbracketwaspostfix;
 
 
@@ -59,7 +70,7 @@ namespace {
 	{
 		char index = getindex(op);
 		while(!postfixstack.empty() && getindex(postfixstack.top()) > index){
-			output.push_back(postfixstack.top());
+			output.push_back(new instruction(postfixstack.top()));
 			postfixstack.pop();
 		}				
 	}
@@ -67,9 +78,10 @@ namespace {
 	void
 	popuntil(string limit){
 		while(!postfixstack.empty() && postfixstack.top() != limit){
-			output.push_back(postfixstack.top());
+			output.push_back(new instruction(postfixstack.top()));
 			postfixstack.pop();
 		}
+		postfixstack.pop();
 	}
 
 	string
@@ -103,6 +115,25 @@ namespace {
 			return retval;
 		}
 	}
+
+	template <typename T>
+	void printstack(stack<T> stck){
+		cout<<"printing stack"<<endl;
+		for (int i = 0; i < stck.size(); ++i)
+		{
+			cout<<stck.top();
+			stck.pop();
+		}
+		cout<<endl;
+	}
+
+	void popempty(){
+
+		while(!postfixstack.empty()){
+			output.push_back(new instruction(postfixstack.top()));
+			postfixstack.pop();
+		}		
+	}
 }
 
 
@@ -119,54 +150,54 @@ namespace lexer{
 			sm	= nextnotspace	(str,	i,	false	);
 	
 			//brackets closing
-					if(s == "]"											)	{		output.push_back(bracketstack.top()); bracketstack.pop()								}
-			else 	if(s == "}"											)	{		output.push_back(bracketstack.top()); bracketstack.pop()								}
-			else 	if(s == ")"	&& !lastbracketwaspostfix.top()			)	{		output.push_back(bracketstack.top()); bracketstack.pop()	lastbracketwaspostfix.pop();}
-			else 	if(s == ")"	&& lastbracketwaspostfix.top()			)	{		popuntil(	"("		);										lastbracketwaspostfix.pop();}
-			else 	if(s == "\""										)	{		output.push_back(bracketstack.top()); bracketstack.pop()								}
+					if(s == "]"											)	{		popempty(); output.push_back(new instruction("LIST",bracketstack.top())); bracketstack.pop();								}
+			else 	if(s == "}"											)	{		popempty(); output.push_back(new instruction("DICT",bracketstack.top())); bracketstack.pop();								}
+			else 	if(s == ")"	&& !lastbracketwaspostfix.top()			)	{		popempty(); output.push_back(new instruction("TUPLE",bracketstack.top())); bracketstack.pop();	lastbracketwaspostfix.pop();}
+			else 	if(s == ")"	&& lastbracketwaspostfix.top()			)	{		popuntil("(");																					lastbracketwaspostfix.pop();}
+			else 	if(s == "\""										)	{		popempty(); output.push_back(new instruction("STRING",bracketstack.top())); bracketstack.pop();								}
 			//brackets opening
-			else 	if(s == "["											)	{		bracketstack.push(0);																	}
-			else 	if(s == "{"											)	{		bracketstack.push(0);																	}
-			else 	if(s == "("	&& !(isnumeric(sm) || isoperator(sm))	)	{		bracketstack.push(0);	lastbracketwaspostfix.push(false);								}
-			else 	if(s == "("	&&  (isnumeric(sm) || isoperator(sm))	)	{		postfixstack.push("(");	lastbracketwaspostfix.push(true);								}
-			else 	if(s == "\""										)	{		bracketstack.push(0);																	}
+			else 	if(s == "["											)	{		bracketstack.push(1);																										}
+			else 	if(s == "{"											)	{		bracketstack.push(1);																										}
+			else 	if(s == "("	&& !(isnumeric(sm) || isoperator(sm))	)	{		bracketstack.push(1);	lastbracketwaspostfix.push(false);																	}
+			else 	if(s == "("	&&  (isnumeric(sm) || isoperator(sm))	)	{		postfixstack.push("(");	lastbracketwaspostfix.push(true);																	}
+			else 	if(s == "\""										)	{		bracketstack.push(1);																										}
 			//assignment
-			else 	if(s == "=" && sp != "="							)	{		popuntilequal("=");		postfixstack.push("=");											}
+			else 	if(s == "=" && sp != "="							)	{		popuntilequal("=");		postfixstack.push("=");																				}
 			//lists
-			else 	if(s == ","											)	{		bracketstack.top() += 1																	}
+			else 	if(s == ","											)	{		bracketstack.top() += 1;																									}
 			//comparison
-			else 	if(s == "=" && sp == "="							)	{i+=1; 	popuntilequal("==");	postfixstack.push("==");										}
-			else 	if(s == "!" && sp == "="							)	{i+=1; 	popuntilequal("!=");	postfixstack.push("!=");										}
-			else 	if(s == ">" && sp == "="							)	{i+=1; 	popuntilequal(">=");	postfixstack.push(">=");										}
-			else 	if(s == "<" && sp == "=" 							)	{i+=1; 	popuntilequal("<=");	postfixstack.push("<=");										}			
-			else 	if(s == ">" && sp != "="							)	{		popuntilequal(">");		postfixstack.push(">");											}
-			else 	if(s == "<" && sp != "=" 							)	{		popuntilequal("<");		postfixstack.push("<");											}			
+			else 	if(s == "=" && sp == "="							)	{i+=1; 	popuntilequal("==");	postfixstack.push("==");																			}
+			else 	if(s == "!" && sp == "="							)	{i+=1; 	popuntilequal("!=");	postfixstack.push("!=");																			}
+			else 	if(s == ">" && sp == "="							)	{i+=1; 	popuntilequal(">=");	postfixstack.push(">=");																			}
+			else 	if(s == "<" && sp == "=" 							)	{i+=1; 	popuntilequal("<=");	postfixstack.push("<=");																			}			
+			else 	if(s == ">" && sp != "="							)	{		popuntilequal(">");		postfixstack.push(">");																				}
+			else 	if(s == "<" && sp != "=" 							)	{		popuntilequal("<");		postfixstack.push("<");																				}			
 			// +
-			else 	if(s == "+" && sp == "+"							)	{i+=1; 	popuntilequal("++");	postfixstack.push("++");										}
-			else 	if(s == "+" && sp != "+"							)	{		popuntilequal("+");		postfixstack.push("+");											}
-			else 	if(s == "+" && sp == "="							)	{i+=1;	popuntilequal("+=");	postfixstack.push("+=");										}
+			else 	if(s == "+" && sp == "+"							)	{i+=1; 	popuntilequal("++");	postfixstack.push("++");																			}
+			else 	if(s == "+" && sp != "+"							)	{		popuntilequal("+");		postfixstack.push("+");																				}
+			else 	if(s == "+" && sp == "="							)	{i+=1;	popuntilequal("+=");	postfixstack.push("+=");																			}
 			// -
-			else 	if(s == "-" && sp == "-"							)	{i+=1;	popuntilequal("--");	postfixstack.push("--");										}
-			else 	if(s == "-" && sp != "-"							)	{		popuntilequal("-");		postfixstack.push("-");											}
-			else 	if(s == "-" && sp == "="							)	{i+=1;	popuntilequal("-=");	postfixstack.push("-=");										}
+			else 	if(s == "-" && sp == "-"							)	{i+=1;	popuntilequal("--");	postfixstack.push("--");																			}
+			else 	if(s == "-" && sp != "-"							)	{		popuntilequal("-");		postfixstack.push("-");																				}
+			else 	if(s == "-" && sp == "="							)	{i+=1;	popuntilequal("-=");	postfixstack.push("-=");																			}
 			// *
-			else 	if(s == "*" && sp == "*"							)	{i+=1;	popuntilequal("**");	postfixstack.push("**");										}
-			else 	if(s == "*" && sp != "*"							)	{		popuntilequal("*");		postfixstack.push("*");											}
-			else 	if(s == "*" && sp == "="							)	{i+=1;	popuntilequal("*=");	postfixstack.push("*=");										}
+			else 	if(s == "*" && sp == "*"							)	{i+=1;	popuntilequal("**");	postfixstack.push("**");																			}
+			else 	if(s == "*" && sp != "*"							)	{		popuntilequal("*");		postfixstack.push("*");																				}
+			else 	if(s == "*" && sp == "="							)	{i+=1;	popuntilequal("*=");	postfixstack.push("*=");																			}
 			// /
-			else 	if(s == "/" && sp == "/"							)	{i+=1;	popuntilequal("//");	postfixstack.push("//");										}
-			else 	if(s == "/" && sp != "/"							)	{		popuntilequal("/");		postfixstack.push("/");											}
-			else 	if(s == "/" && sp == "="							)	{i+=1;	popuntilequal("/=");	postfixstack.push("/=");										}
-			else	if(s == " "											)	{continue;																						}
-			else															{output.push_back(s);																			}
+			else 	if(s == "/" && sp == "/"							)	{i+=1;	popuntilequal("//");	postfixstack.push("//");																			}
+			else 	if(s == "/" && sp != "/"							)	{		popuntilequal("/");		postfixstack.push("/");																				}
+			else 	if(s == "/" && sp == "="							)	{i+=1;	popuntilequal("/=");	postfixstack.push("/=");																			}
+			else	if(s == " "											)	{continue;																															}
+			else															{output.push_back(new instruction(s));																								}
 		}
-		while(!postfixstack.empty() && !isbracket(postfixstack.top())){
-			output.push_back(postfixstack.top());
-			postfixstack.pop();
-		}		
+		popempty();
 
 		for(auto& i : output){
-			cout<<i<<" ";
+			cout<<i->type<<"";
+			if(i->argument != 0){
+				cout<<"("<<i->argument<<") ";
+			}
 		}
 		cout<<endl;
 		output.clear();
