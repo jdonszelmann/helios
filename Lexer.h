@@ -1,31 +1,13 @@
 
-#include stack
+#include <stack>
 
 stack<string> postfixstack;
 vector<string> output;
 
 
 namespace {
-	void 
-	popuntilequal(str op)
-	{
-		char index = getindex(op);
-		while(!postfixstack.empty && getindex(postfixstack.top()) <= index){
-			output.push_back(postfixstack.top())
-			postfixstack.pop()
-		}				
-	}
-
-	void
-	popuntil(string limit){
-		while(!postfixstack.empty() && postfixstack.top() != limit){
-			output.push_back(postfixstack.top())
-			postfixstack.pop()
-		}
-	}
-
 	char 
-	getindex(str op){
+	getindex(string op){
 		switch(op.c_str()){
 			// assignment
 			case "=":{return 1000;}
@@ -47,6 +29,24 @@ namespace {
 			case "/":{return 31;}
 			case "//":{return 31;}
 			case "/=":{return 11;}
+		}
+	}
+
+	void 
+	popuntilequal(string op)
+	{
+		char index = getindex(op);
+		while(!postfixstack.empty && getindex(postfixstack.top()) <= index){
+			output.push_back(postfixstack.top())
+			postfixstack.pop()
+		}				
+	}
+
+	void
+	popuntil(string limit){
+		while(!postfixstack.empty() && postfixstack.top() != limit){
+			output.push_back(postfixstack.top())
+			postfixstack.pop()
 		}
 	}
 
