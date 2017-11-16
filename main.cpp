@@ -8,6 +8,7 @@ using namespace std;
 #include "tools.h"
 #include "filereader.h"
 #include "lexer.h"
+#include "compiler.h"
 
 
 int main(int argc, char *argv[]){
@@ -22,4 +23,6 @@ int main(int argc, char *argv[]){
 			lexer::decode(i);
 		}
 	}
+	vector<instruction *> code = lexer::code();
+	compiler::compile(code);
 }

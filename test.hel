@@ -1,5 +1,9 @@
 
 
 a = (3 + 5 * 9) / 2
-if(a == 3)
+if(a == 3):
 	print("hey")
+	if(a == 3):
+		print("hey")
+	print("hey")
+a = 3 + 5
