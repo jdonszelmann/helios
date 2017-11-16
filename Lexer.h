@@ -192,7 +192,7 @@ namespace lexer{
 			else															{output.push_back(new instruction(s));																								}
 		}
 
-		cout<<"hey"<<endl;		
+			
 		popempty();
 
 		for(auto& i : output){
