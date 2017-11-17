@@ -9,8 +9,8 @@ Helios programming language - similar to python and made (not a lot of) c++ code
 
 # in progress:
 - [x] lexing
-- [ ] compilation
-- [ ] functions
+- [x] compilation
+- [x] functions
 - [ ] classes
 - [ ] standard library
 - [ ] import system
