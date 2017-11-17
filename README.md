@@ -18,7 +18,7 @@ _be sure to suggest more_
 
 # examples of correct syntax
 (be aware not everything is implemented YET)
-```
+```python
   a = 3
   b = 5
   c = (a + b)*2
