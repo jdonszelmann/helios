@@ -16,6 +16,7 @@ class variable{
 		virtual variable * copy		 	(				 );
 };
 
+
 ostream & operator<<(ostream & os, stack<variable *> my_stack) //function header
 {
 	cout << "[";
@@ -79,7 +80,7 @@ class ValueError: public Exception{
 
 class float_var: public variable{
 	public:
-		long double val;
+		float val;
 
 		virtual string print(){return (string)"float object with value: " + to_string(val);}
 

@@ -7,7 +7,9 @@ class instruction{
 		string type;
 		string value;
 		int argument;
-		instruction(string type,int argument = 0,string value=""){
+		bool nextisequals;
+		instruction(string type, bool nextisequals, int argument = 0,string value=""){
+			this->nextisequals = nextisequals;
 			this->type = type;
 			this->value = value;
 			this->argument = argument;
@@ -25,6 +27,7 @@ int currenttabdepth = 0;
 unsigned char spacesinarow;
 string last;
 bool wasliteral;
+string s, sp, sm;
 
 
 namespace {
@@ -32,12 +35,12 @@ namespace {
 		currenttabdepth += 1;
 		if(currenttabdepth > tabdepth){
 			tabdepth = currenttabdepth;
-			output.push_back(new instruction("INDENT"));
+			output.push_back(new instruction("INDENT", sp=="="));
 		}
 	}
 	void calctabdepthend(){
 		if(currenttabdepth < tabdepth){
-			output.push_back(new instruction("DEDENT"));
+			output.push_back(new instruction("DEDENT", sp=="="));
 		}else{
 			return;
 		}
@@ -55,7 +58,7 @@ namespace {
 			output.back()->value += current;
 			last = current;
 		}else{
-			output.push_back(new instruction("LITERAL",0,current));
+			output.push_back(new instruction("LITERAL",sp=="=",0,current));
 			last = current;
 		}
 	}
@@ -67,13 +70,13 @@ namespace {
 
 	bool
 	isnumeric(string val){
-		return val == "1" || val == "1" || val == "2" || val == "4" || val == "5" || val == "6" || val == "7" || val == "8" || val == "9" || val == "0";
+		return val == "0" || val == "1" || val == "2" || val == "4" || val == "5" || val == "6" || val == "7" || val == "8" || val == "9";
 	}
 
 	bool
 	isoperator(string val){
 		return val == "+" || val == "-" || val == "*" || val == "/" || val == "=" || val == ">" || val == "<" || val == "!" || val == "~" || (val == ")" && lastbracketwaspostfix.top());
-	}	
+	}
 
 	char 
 	getindex(string op){
@@ -81,6 +84,8 @@ namespace {
 			// assignment
 			case str2int(":")	:{return 128;	}
 			case str2int("=")	:{return 127;	}
+			// .
+			case str2int(".")	:{return 9;	}
 			// +
 			case str2int("+")	:{return 30;	}
 			case str2int("++")	:{return 20;	}
@@ -108,7 +113,7 @@ namespace {
 	{
 		char index = getindex(op);
 		while(!postfixstack.empty() && getindex(postfixstack.top()) > index){
-			output.push_back(new instruction(postfixstack.top()));
+			output.push_back(new instruction(postfixstack.top(), sp=="="));
 			postfixstack.pop();
 		}				
 	}
@@ -116,7 +121,7 @@ namespace {
 	void
 	popuntil(string limit){
 		while(!postfixstack.empty() && postfixstack.top() != limit){
-			output.push_back(new instruction(postfixstack.top()));
+			output.push_back(new instruction(postfixstack.top(), sp=="="));
 			postfixstack.pop();
 		}
 		postfixstack.pop();
@@ -168,7 +173,7 @@ namespace {
 	void popempty(){
 
 		while(!postfixstack.empty()){
-			output.push_back(new instruction(postfixstack.top()));
+			output.push_back(new instruction(postfixstack.top(), sp=="="));
 			postfixstack.pop();
 		}		
 	}
@@ -180,7 +185,6 @@ namespace lexer{
 	decode(string str)
 	{
 		currenttabdepth = 0;
-		string s, sp, sm;
 		for
 		(int i = 0; i < str.size(); ++i)
 		{
@@ -194,51 +198,55 @@ namespace lexer{
 				calctabdepthend();
 			}
 			//brackets closing
-					if(s == "]"											)	{		popempty(); output.push_back(new instruction("LIST",bracketstack.top())); bracketstack.pop();								}
-			else 	if(s == "}"											)	{		popempty(); output.push_back(new instruction("DICT",bracketstack.top())); bracketstack.pop();								}
-			else 	if(s == ")"	&& !lastbracketwaspostfix.top()			)	{		popempty(); output.push_back(new instruction("TUPLE",bracketstack.top())); bracketstack.pop();	lastbracketwaspostfix.pop();}
-			else 	if(s == ")"	&& lastbracketwaspostfix.top()			)	{		popuntil("(");																					lastbracketwaspostfix.pop();}
-			else 	if(s == "\"" && stringopen							)	{		popempty(); output.push_back(new instruction("STRING",bracketstack.top()-2)); bracketstack.pop();stringopen = !stringopen;	}
+					if(s == "]"											)	{		output.push_back(new instruction("LIST", sp=="=",bracketstack.top())); bracketstack.pop();											}
+			else 	if(s == "}"											)	{		output.push_back(new instruction("DICT", sp=="=",bracketstack.top())); bracketstack.pop();											}
+			else 	if(s == ")"	&& !lastbracketwaspostfix.top()			)	{		output.push_back(new instruction("TUPLE", sp=="=",bracketstack.top())); bracketstack.pop();	lastbracketwaspostfix.pop();			}
+			else 	if(s == ")"	&& lastbracketwaspostfix.top()			)	{		popuntil("(");																					lastbracketwaspostfix.pop();		}
+			else 	if(s == "\"" && stringopen							)	{					 output.push_back(new instruction("STRING",sp=="=",bracketstack.top()-2)); bracketstack.pop();stringopen = !stringopen;	}
 			//brackets opening
-			else 	if(s == "["											)	{		bracketstack.push(1);																										}
-			else 	if(s == "{"											)	{		bracketstack.push(1);																										}
-			else 	if(s == "("	&& !(isnumeric(sm) || isoperator(sm))	)	{		bracketstack.push(1);	lastbracketwaspostfix.push(false);																	}
-			else 	if(s == "("	&&  (isnumeric(sm) || isoperator(sm))	)	{		postfixstack.push("(");	lastbracketwaspostfix.push(true);																	}
-			else 	if(s == "\""&& !stringopen							)	{		bracketstack.push(1);	stringopen = !stringopen	;																		}
+			else 	if(s == "["											)	{		bracketstack.push(1);																												}
+			else 	if(s == "{"											)	{		bracketstack.push(1);																												}
+			else 	if(s == "("	&& !(isnumeric(sm) || isoperator(sm))	)	{		bracketstack.push(1);	lastbracketwaspostfix.push(false);																			}
+			else 	if(s == "("	&&  (isnumeric(sm) || isoperator(sm))	)	{		postfixstack.push("(");	lastbracketwaspostfix.push(true);																			}
+			else 	if(s == "\""&& !stringopen							)	{		bracketstack.push(1);	stringopen = !stringopen	;																				}
 			//block
-			else 	if(s == ":"											)	{		popuntilequal(":");		output.push_back(new instruction(":"));																}
+			else 	if(s == ":"											)	{		popuntilequal(":");		output.push_back(new instruction(":",sp=="="));																		}
 			//assignment			
-			else 	if(s == "=" && sp != "="							)	{		popuntilequal("=");		postfixstack.push("=");																				}
+			else 	if(s == "=" && sp != "="							)	{		popuntilequal("=");		postfixstack.push("=");																						}
 			//lists
-			else 	if(s == ","											)	{		bracketstack.top() += 1;																									}
+			else 	if(s == ","											)	{		bracketstack.top() += 1;																											}
 			//comparison
-			else 	if(s == "=" && sp == "="							)	{i+=1; 	popuntilequal("==");	postfixstack.push("==");																			}
-			else 	if(s == "!" && sp == "="							)	{i+=1; 	popuntilequal("!=");	postfixstack.push("!=");																			}
-			else 	if(s == ">" && sp == "="							)	{i+=1; 	popuntilequal(">=");	postfixstack.push(">=");																			}
-			else 	if(s == "<" && sp == "=" 							)	{i+=1; 	popuntilequal("<=");	postfixstack.push("<=");																			}			
-			else 	if(s == ">" && sp != "="							)	{		popuntilequal(">");		postfixstack.push(">");																				}
-			else 	if(s == "<" && sp != "=" 							)	{		popuntilequal("<");		postfixstack.push("<");																				}			
+			else 	if(s == "=" && sp == "="							)	{i+=1; 	popuntilequal("==");	postfixstack.push("==");																					}
+			else 	if(s == "!" && sp == "="							)	{i+=1; 	popuntilequal("!=");	postfixstack.push("!=");																					}
+			else 	if(s == ">" && sp == "="							)	{i+=1; 	popuntilequal(">=");	postfixstack.push(">=");																					}
+			else 	if(s == "<" && sp == "=" 							)	{i+=1; 	popuntilequal("<=");	postfixstack.push("<=");																					}			
+			else 	if(s == ">" && sp != "="							)	{		popuntilequal(">");		postfixstack.push(">");																						}
+			else 	if(s == "<" && sp != "=" 							)	{		popuntilequal("<");		postfixstack.push("<");																						}			
 			// +
-			else 	if(s == "+" && sp == "+"							)	{i+=1; 	popuntilequal("++");	postfixstack.push("++");																			}
-			else 	if(s == "+" && sp != "+"							)	{		popuntilequal("+");		postfixstack.push("+");																				}
-			else 	if(s == "+" && sp == "="							)	{i+=1;	popuntilequal("+=");	postfixstack.push("+=");																			}
+			else 	if(s == "+" && sp == "+"							)	{i+=1; 	popuntilequal("++");	postfixstack.push("++");																					}
+			else 	if(s == "+" && sp != "+"							)	{		popuntilequal("+");		postfixstack.push("+");																						}
+			else 	if(s == "+" && sp == "="							)	{i+=1;	popuntilequal("+=");	postfixstack.push("+=");																					}
 			// -
-			else 	if(s == "-" && sp == "-"							)	{i+=1;	popuntilequal("--");	postfixstack.push("--");																			}
-			else 	if(s == "-" && sp != "-"							)	{		popuntilequal("-");		postfixstack.push("-");																				}
-			else 	if(s == "-" && sp == "="							)	{i+=1;	popuntilequal("-=");	postfixstack.push("-=");																			}
+			else 	if(s == "-" && sp == "-"							)	{i+=1;	popuntilequal("--");	postfixstack.push("--");																					}
+			else 	if(s == "-" && sp != "-"							)	{		popuntilequal("-");		postfixstack.push("-");																						}
+			else 	if(s == "-" && sp == "="							)	{i+=1;	popuntilequal("-=");	postfixstack.push("-=");																					}
 			// *
-			else 	if(s == "*" && sp == "*"							)	{i+=1;	popuntilequal("**");	postfixstack.push("**");																			}
-			else 	if(s == "*" && sp != "*"							)	{		popuntilequal("*");		postfixstack.push("*");																				}
-			else 	if(s == "*" && sp == "="							)	{i+=1;	popuntilequal("*=");	postfixstack.push("*=");																			}
+			else 	if(s == "*" && sp == "*"							)	{i+=1;	popuntilequal("**");	postfixstack.push("**");																					}
+			else 	if(s == "*" && sp != "*"							)	{		popuntilequal("*");		postfixstack.push("*");																						}
+			else 	if(s == "*" && sp == "="							)	{i+=1;	popuntilequal("*=");	postfixstack.push("*=");																					}
 			// /
-			else 	if(s == "/" && sp == "/"							)	{i+=1;	popuntilequal("//");	postfixstack.push("//");																			}
-			else 	if(s == "/" && sp != "/"							)	{		popuntilequal("/");		postfixstack.push("/");																				}
-			else 	if(s == "/" && sp == "="							)	{i+=1;	popuntilequal("/=");	postfixstack.push("/=");																			}
+			else 	if(s == "/" && sp == "/"							)	{i+=1;	popuntilequal("//");	postfixstack.push("//");																					}
+			else 	if(s == "/" && sp != "/"							)	{		popuntilequal("/");		postfixstack.push("/");																						}
+			else 	if(s == "/" && sp == "="							)	{i+=1;	popuntilequal("/=");	postfixstack.push("/=");																					}
+			// .
+			else 	if(s == "." && !isnumeric(sp)						)	{		popuntilequal(".");	postfixstack.push(".");																							}
+			// #
+			else 	if(s == "#" && !stringopen							)	{		break;																																}
 			//tab
-			else	if(s == "\t"										)	{calctabdepth();																													}
+			else	if(s == "\t"										)	{calctabdepth();																															}
 			//other
-			else	if(s == " "											)	{if(spacesinarow == tabspaces-1){spacesinarow = 0;calctabdepth();}else{spacesinarow ++;}continue;									}
-			else															{prepare_literal(s);	wasliteral = true;																							}
+			else	if(s == " "											)	{if(spacesinarow == tabspaces-1){spacesinarow = 0;calctabdepth();}else{spacesinarow ++;}continue;											}
+			else															{prepare_literal(s);	wasliteral = true;																									}
 		
 			if(s != " "){spacesinarow = 0;}
 			if(!wasliteral){last = "";}
@@ -246,6 +254,7 @@ namespace lexer{
 
 		}
 		popempty();
+		output.push_back(new instruction("EOL",sp=="="));
 	}
 
 

@@ -1,10 +1,15 @@
+#define __USE_MINGW_ANSI_STDIO 0
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <map>
+#include <cmath>
+#include <iterator>
 
 using namespace std;
 
+#include "include.h"
 #include "tools.h"
 #include "filereader.h"
 #include "lexer.h"
@@ -19,7 +24,6 @@ int main(int argc, char *argv[]){
 	filereader * reader = new filereader(argv[1]);
 	while(!reader->eof){
 		for(auto& i:split(reader->next(),";")){
-			// cout<<i<<endl;
 			lexer::decode(i);
 		}
 	}
