@@ -13,11 +13,8 @@
 #define TRUEDIV			0x0c
 #define POW				0x0d
 #define ES				0x0e
-#define LSTS			0x0f
-#define LSTE			0x10
-#define CALS			0x11
-#define CALE			0x12
-#define CALL			0x13
+#define LST				0x0f
+#define CALL			0x10
 
 
 

@@ -6,13 +6,13 @@ Helios programming language - similar to python and made (not a lot of) c++ code
  - VM
  - variables
  - math expressions  
+ - compilation (though it is primitive)
+ - lexing (though it is primitive)
 
 # in progress:
-- [x] lexing
-- [x] compilation
 - [x] functions
 - [ ] classes
-- [ ] standard library
+- [x] standard library
 - [ ] import system
 _be sure to suggest more_
 

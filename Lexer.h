@@ -82,8 +82,8 @@ namespace {
 	getindex(string op){
 		switch(str2int(op.c_str())){
 			// assignment
-			case str2int(":")	:{return 128;	}
-			case str2int("=")	:{return 127;	}
+			case str2int(":")	:{return 127;	}
+			case str2int("=")	:{return 126;	}
 			// .
 			case str2int(".")	:{return 9;	}
 			// +
@@ -104,7 +104,7 @@ namespace {
 			case str2int("/")	:{return 31;	}
 			case str2int("//")	:{return 31;	}
 			case str2int("/=")	:{return 11;	}
-			default				:{return 0;		}
+			default				:{return 0;	}
 		}
 	}
 
@@ -112,19 +112,39 @@ namespace {
 	popuntilequal(string op)
 	{
 		char index = getindex(op);
-		while(!postfixstack.empty() && getindex(postfixstack.top()) > index){
+		while(!postfixstack.empty()){
+			if(index < getindex(postfixstack.top()) || getindex(postfixstack.top()) == 0){
+				break;
+			}
 			output.push_back(new instruction(postfixstack.top(), sp=="="));
 			postfixstack.pop();
 		}				
 	}
 
+	template <typename T>
+	void printstack(stack<T> stck){
+		cout<<"printing stack"<<endl;
+		for (int i = 0; i < stck.size(); ++i)
+		{
+			cout<<stck.top();
+			stck.pop();
+		}
+		cout<<"          "<<s<<endl;
+		cout<<"end stack"<<endl;
+	}
+
 	void
 	popuntil(string limit){
-		while(!postfixstack.empty() && postfixstack.top() != limit){
+		while(!postfixstack.empty()){
+			if(postfixstack.top() == limit){
+				break;
+			}
 			output.push_back(new instruction(postfixstack.top(), sp=="="));
 			postfixstack.pop();
 		}
-		postfixstack.pop();
+		if(postfixstack.top() == "("){
+			postfixstack.pop();
+		}
 	}
 
 	string
@@ -159,19 +179,7 @@ namespace {
 		}
 	}
 
-	template <typename T>
-	void printstack(stack<T> stck){
-		cout<<"printing stack"<<endl;
-		for (int i = 0; i < stck.size(); ++i)
-		{
-			cout<<stck.top();
-			stck.pop();
-		}
-		cout<<endl;
-	}
-
 	void popempty(){
-
 		while(!postfixstack.empty()){
 			output.push_back(new instruction(postfixstack.top(), sp=="="));
 			postfixstack.pop();
@@ -184,6 +192,7 @@ namespace lexer{
 	void
 	decode(string str)
 	{
+		last = "";
 		currenttabdepth = 0;
 		for
 		(int i = 0; i < str.size(); ++i)
@@ -201,13 +210,15 @@ namespace lexer{
 					if(s == "]"											)	{		output.push_back(new instruction("LIST", sp=="=",bracketstack.top())); bracketstack.pop();											}
 			else 	if(s == "}"											)	{		output.push_back(new instruction("DICT", sp=="=",bracketstack.top())); bracketstack.pop();											}
 			else 	if(s == ")"	&& !lastbracketwaspostfix.top()			)	{		output.push_back(new instruction("TUPLE", sp=="=",bracketstack.top())); bracketstack.pop();	lastbracketwaspostfix.pop();			}
-			else 	if(s == ")"	&& lastbracketwaspostfix.top()			)	{		popuntil("(");																					lastbracketwaspostfix.pop();		}
+			else 	if(s == ")"	&& lastbracketwaspostfix.top()			)	{		popuntil("(");																				lastbracketwaspostfix.pop();			}
+			else 	if(s == "'" && stringopen							)	{					 output.push_back(new instruction("STRING",sp=="=",bracketstack.top()-2)); bracketstack.pop();stringopen = !stringopen;	}
 			else 	if(s == "\"" && stringopen							)	{					 output.push_back(new instruction("STRING",sp=="=",bracketstack.top()-2)); bracketstack.pop();stringopen = !stringopen;	}
 			//brackets opening
 			else 	if(s == "["											)	{		bracketstack.push(1);																												}
 			else 	if(s == "{"											)	{		bracketstack.push(1);																												}
 			else 	if(s == "("	&& !(isnumeric(sm) || isoperator(sm))	)	{		bracketstack.push(1);	lastbracketwaspostfix.push(false);																			}
 			else 	if(s == "("	&&  (isnumeric(sm) || isoperator(sm))	)	{		postfixstack.push("(");	lastbracketwaspostfix.push(true);																			}
+			else 	if(s == "'"&& !stringopen							)	{		bracketstack.push(1);	stringopen = !stringopen	;																				}
 			else 	if(s == "\""&& !stringopen							)	{		bracketstack.push(1);	stringopen = !stringopen	;																				}
 			//block
 			else 	if(s == ":"											)	{		popuntilequal(":");		output.push_back(new instruction(":",sp=="="));																		}
@@ -254,7 +265,6 @@ namespace lexer{
 
 		}
 		popempty();
-		output.push_back(new instruction("EOL",sp=="="));
 	}
 
 

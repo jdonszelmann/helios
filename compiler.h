@@ -1,9 +1,11 @@
-
+ 
 #include "types.h"
 #include "block.h"
+#include "executer.h"
 
 stack<vector<unsigned char>> vars;
 unsigned char value;
+bool wasvar;
 
 namespace {
 	bool 
@@ -12,6 +14,28 @@ namespace {
 		char* p;
 		strtol(line.c_str(), &p, 10);
 		return *p == 0;
+	}
+
+	static 
+	bool 
+	is_float_number(const std::string& string){
+	string::const_iterator it = string.begin();
+		bool decimalPoint = false;
+		int minSize = 0;
+		if(string.size()>0 && (string[0] == '-' || string[0] == '+')){
+			it++;
+			minSize++;
+		}
+		while(it != string.end()){
+			if(*it == '.'){
+				if(!decimalPoint) decimalPoint = true;
+				else break;
+			}else if(!std::isdigit(*it) && ((*it!='f') || it+1 != string.end() || !decimalPoint)){
+				break;
+			}
+			++it;
+		}
+		return string.size()>minSize && it == string.end();
 	}
 }
 
@@ -33,6 +57,8 @@ namespace compiler{
 				sp = code[i+1];
 			}
 			if(s->type == "LITERAL"){
+				wasvar = false;
+				cout<<endl;
 				cout<<s->value<<endl;
 				//string
 				if(sp->type == "STRING"){
@@ -41,7 +67,7 @@ namespace compiler{
 					cout<<"string"<<endl;
 				}
 				//float
-				else if(s->value.find('.') != std::string::npos && is_number(s->value) && sp->type != "STRING"){
+				else if(s->value.find('.') != std::string::npos && is_float_number(s->value) && sp->type != "STRING"){
 					const_counter++;
 					current->add_constant(const_counter,new float_var(atof(s->value.c_str())));
 					cout<<"float"<<endl;
@@ -54,20 +80,21 @@ namespace compiler{
 				}			
 				//variable
 				else{
+					wasvar = true;
 					cout<<"var"<<endl;
 					if(s->nextisequals){
 						vector<unsigned char> var;
-						value = variables[var_counter];
+						s->value;
 
 						var.push_back((value >> 24) & 0xFF);
 						var.push_back((value >> 16) & 0xFF);
 						var.push_back((value >> 8) & 0xFF);
 						var.push_back(value & 0xFF);
 						vars.push(var);
-						var_counter;
+						var_counter++;
 					}else{
 						current->add_instruction(LV);
-						value = variables[var_counter];
+						value = var_counter;
 
 						current->add_instruction((value >> 24) & 0xFF);
 						current->add_instruction((value >> 16) & 0xFF);
@@ -76,10 +103,25 @@ namespace compiler{
 						var_counter++;
 					}
 				}
+				if(!wasvar){
+					current->add_instruction(LC);
+					value = const_counter;
+					current->add_instruction((value >> 24) & 0xFF);
+					current->add_instruction((value >> 16) & 0xFF);
+					current->add_instruction((value >> 8) & 0xFF);
+					current->add_instruction(value & 0xFF);					
+				}
+
 
 			}else if(s->type == "LIST"){
 				cout<<s->argument<<endl;
 				cout<<"list"<<endl;
+				current->add_instruction(LST);        
+				value = s->argument;
+				current->add_instruction((value >> 24) & 0xFF);
+				current->add_instruction((value >> 16) & 0xFF);
+				current->add_instruction((value >> 8) & 0xFF);
+				current->add_instruction(value & 0xFF);				
 			}			
 			//operators	
 			else if(s->type == "="){
@@ -134,8 +176,12 @@ namespace compiler{
 			}
 		}
 		current->add_instruction(STP);
-	}
-	for(auto& i:current->code){
-		cout<<i<<endl;
+		for(auto& i:current->code){
+			cout<<to_string(i);
+		}
+		cout<<endl;
+		for (auto& t : current->constants)
+            cout << t.first << " " << t.second->print() <<endl;
+		execute(current);
 	}
 }

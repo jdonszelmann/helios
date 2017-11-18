@@ -171,6 +171,45 @@ class list_var: public variable{
 		};
 };
 
+class string_var: public variable{
+	public:
+		string val;
+
+		string_var(string val){
+			this->val = val;
+		}
+
+		string_var(){
+			this->val = "";
+		}
+
+		void from_string(string item){
+			this->val = item;
+		}
+
+		virtual string print(){
+			string ret = "string object with value: \"";
+			ret += this->val;
+			ret += "\"";
+			return ret;
+		}
+
+		virtual string get_type(){
+			return (string)"string_var";
+		}
+
+		virtual variable * _add			(variable * other);
+		virtual variable * _sub			(variable * other); 
+		virtual variable * _mul			(variable * other);
+		virtual variable * _div			(variable * other);
+		virtual variable * _unary_neg	(				 );
+		virtual variable * _pow			(variable * other);
+		virtual variable * copy		 	(				 ){
+			return new string_var(this->val);
+		};
+};
+
+
 class function_var: public variable{
 
 
@@ -227,6 +266,43 @@ variable * list_var::_pow(variable * other){
 	return NULL;
 }
 
+variable * string_var::_add(variable * other){
+	if(other->get_type() == "string_var"){
+		string_var *other_t = dynamic_cast<string_var *>(other);
+		this->val += other_t->val;
+		return this;
+	}
+	TypeError(this->print() + string("does not support the add operation on objects other than list_var"));
+	return NULL;
+}
+
+variable * string_var::_sub(variable * other){
+	TypeError(this->print() + string("does not support the sub operation"));
+	return NULL;
+}
+
+variable * string_var::_mul(variable * other){
+	if(other->get_type() == "int_var"){
+		//
+	}
+	TypeError(this->print() + string("does not support the mul operation"));
+	return NULL;
+}
+
+variable * string_var::_div(variable * other){
+	TypeError(this->print() + string("does not support the div operation"));
+	return NULL;
+}
+
+variable * string_var::_unary_neg(){
+	TypeError(this->print() + string("does not support the unary_neg operation"));
+	return NULL;
+}
+
+variable * string_var::_pow(variable * other){
+	TypeError(this->print() + string("does not support the pow operation"));
+	return NULL;
+}
 
 variable * float_var::_add(variable * other){
 	if(other->get_type() =="int_var"){

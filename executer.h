@@ -167,12 +167,7 @@ void execute(codeblock* block){
 				break;
 			}
 
-			case LSTS:{
-				frame.push(new list_var());
-				break;
-			}
-
-			case LSTE:{
+			case LST:{
 				vector<int> args;
 				vector<variable *> items;
 				for (int i = 0; i < 4; ++i)
@@ -184,11 +179,7 @@ void execute(codeblock* block){
 					items.push_back(frame.top());
 					frame.pop();
 				}
-				if(frame.top()->get_type() != "list_var"){
-					SyntaxError("list definition invalid");
-				}else{
-					dynamic_cast<list_var *>(frame.top())->from_vector(items);
-				}
+				frame.push(new list_var(items));
 				break;
 			}
 
