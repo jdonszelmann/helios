@@ -4,6 +4,7 @@
 #include "executer.h"
 
 stack<vector<unsigned char>> vars;
+map<string,int> varnames;
 unsigned char value;
 bool wasvar;
 
@@ -92,14 +93,14 @@ namespace compiler{
 						var.push_back(value & 0xFF);
 						vars.push(var);
 					}else{
+						var_counter++;
 						current->add_instruction(LV);
 						value = var_counter;
-
 						current->add_instruction((value >> 24) & 0xFF);
 						current->add_instruction((value >> 16) & 0xFF);
 						current->add_instruction((value >> 8) & 0xFF);
 						current->add_instruction(value & 0xFF);
-						var_counter++;
+						varnames[s.value] = var_counter
 					}
 				}
 				if(!wasvar){
