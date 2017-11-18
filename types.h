@@ -347,7 +347,7 @@ variable * float_var::_unary_neg(){
 
 variable * float_var::_pow(variable * other){
 	if(other->get_type() =="int_var"){
-		return new float_var(this->val * (float)dynamic_cast<int_var *>(other)->val);
+		return new float_var(pow(this->val,(float)dynamic_cast<int_var *>(other)->val));
 	}
 	if(other->get_type() =="float_var"){
 		return new float_var((float)pow(this->val, dynamic_cast<float_var *>(other)->val));

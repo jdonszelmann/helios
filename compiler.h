@@ -85,13 +85,12 @@ namespace compiler{
 					if(s->nextisequals){
 						vector<unsigned char> var;
 						s->value;
-
+						cout<<"--> "<<s<<endl;
 						var.push_back((value >> 24) & 0xFF);
 						var.push_back((value >> 16) & 0xFF);
 						var.push_back((value >> 8) & 0xFF);
 						var.push_back(value & 0xFF);
 						vars.push(var);
-						var_counter++;
 					}else{
 						current->add_instruction(LV);
 						value = var_counter;
@@ -145,9 +144,10 @@ namespace compiler{
 				current->add_instruction(SUB);
 			}else if(s->type == "--"){
 				
-			}
-			else if(s->type == "-="){
+			}else if(s->type == "-="){
 				
+			}else if(s->type == "NEG"){
+				current->add_instruction(UNARY_NEG);
 			}
 			//*
 			else if(s->type == "*"){

@@ -219,7 +219,6 @@ void execute(codeblock* block){
 				if(frame.empty()){
 					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
 				}
-
 				variable * temp1 = frame.top();
 				frame.pop();
 				if(frame.empty()){
