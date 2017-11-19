@@ -533,7 +533,7 @@ variable * string_var::_call(variable * other){
 	TypeError(this->print() + string("does not support the call operation"));
 	return NULL;
 }
-variable * string::_blockcall		(variable * other, variable * block){TypeError(this->print() + string(" does not support the blockcall operation")); return NULL;};
+variable * string_var::_blockcall		(variable * other, variable * block){TypeError(this->print() + string(" does not support the blockcall operation")); return NULL;};
 
 variable * float_var::_add(variable * other){
 	if(other->get_type() =="int_var"){
