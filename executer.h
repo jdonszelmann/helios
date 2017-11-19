@@ -214,27 +214,31 @@ execute(codeblock* block){
 				if(frame.empty()){
 					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
 				}
-
-				variable * temp1 = frame.top();
-				frame.pop();
-				if(frame.empty()){
-					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
-				}
 				if(frame.top()->get_type() == "block"){
+					variable * temp1 = frame.top();
+					frame.pop();
+					if(frame.empty()){
+						SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+					}
 					variable * temp2 = frame.top();
 					frame.pop();
-
+					if(frame.empty()){
+						SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+					}
 					variable * temp3 = frame.top();
 					frame.pop();
-
-					variable * temp4 = temp3->_blockcall(temp1,temp2);
-					if(temp3->get_type()!="None_var"){
-						frame.push(temp3);
+					variable * temp4 = temp3->_blockcall(temp2,temp1);
+					if(temp4->get_type()!="None_var"){
+						frame.push(temp4);
 					}
-				}else{
+				}else{					
+					variable * temp1 = frame.top();
+					frame.pop();
+					if(frame.empty()){
+						SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+					}
 					variable * temp2 = frame.top();
 					frame.pop();
-
 					variable * temp3 = temp2->_call(temp1);
 					if(temp3->get_type()!="None_var"){
 						frame.push(temp3);
@@ -342,8 +346,15 @@ execute(codeblock* block){
 			case ES:{
 				scopes->enter_scope();
 				break;
+			}			
+			case LS:{
+				scopes->exit_scope();
+				break;
 			}
-
+			case RET:{
+				running = false;
+				break;
+			}
 			case STP:{
 				running = false;
 				break;

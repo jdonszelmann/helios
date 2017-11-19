@@ -16,8 +16,10 @@
 #define LST				0x0f
 #define CALL			0x10
 #define TUP				0x11
+#define LS				0x12
+#define RET				0x13
 
-#define ____DEBUG____  true
+#define ____DEBUG____  false
 
 
 //datatypes

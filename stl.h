@@ -50,10 +50,8 @@ variable * _str(tuple_var * v){
 	}
 }
 
-variable * function(tuple_var * v){
-
-
-	return new function_var();
+variable * function(tuple_var * v, codeblock * block){
+	return new function_var(block);
 }
 
 namespace stl{
@@ -63,7 +61,7 @@ namespace stl{
 		new cpp_function_var(_int),
 		new cpp_function_var(_float),
 		new cpp_function_var(_str),
-		new cpp_function_var(function),
+		new cpp_function_block_var(function),
 	};
 	vector<string> stl_function_names = {
 		"print",

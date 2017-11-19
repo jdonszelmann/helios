@@ -310,8 +310,37 @@ class cpp_function_var: public variable{
 		virtual variable * _blockcall	(variable * other, variable * block);
 		virtual variable * _call		(variable * other);
 };
-
 #include "block.h"
+
+class cpp_function_block_var: public variable{
+	public:
+		variable * (* func)(tuple_var *, codeblock *);
+		cpp_function_block_var(variable * (*func)(tuple_var *, codeblock *)){
+			this->func = func;
+		}
+
+		virtual string print(){
+			return"cpp_function_block object";
+		}
+
+		virtual string get_type(){
+			return (string)"cpp_function_block_var";
+		}
+
+		virtual variable * _add			(variable * other);
+		virtual variable * _sub			(variable * other); 
+		virtual variable * _mul			(variable * other);
+		virtual variable * _div			(variable * other);
+		virtual variable * _unary_neg	(				 );
+		virtual variable * _pow			(variable * other);
+		virtual variable * copy		 	(				 ){
+			return new cpp_function_block_var(this->func);
+		};
+		virtual variable * _blockcall	(variable * other, variable * block);
+		virtual variable * _call		(variable * other);
+};
+
+
 
 class function_var: public variable{
 	public:
@@ -376,19 +405,29 @@ variable * cpp_function_var::_pow			(variable * other){TypeError(this->print() +
 variable * cpp_function_var::_call			(variable * other){
 	if(other->get_type() == "tuple_var"){
 		variable * a = this->func(dynamic_cast<tuple_var *>(other));
+		return a;
 	}else{
 		SyntaxError("INVALID FUNCTION CALL");
 	}
 };
-variable * cpp_function_var::_blockcall		(variable * other, variable * block){
+variable * cpp_function_var::_blockcall		(variable * other, variable * block){TypeError(this->print() + string(" does not support the blockcall operation")); return NULL;};
+
+variable * cpp_function_block_var::_add			(variable * other){TypeError(this->print() + string(" does not support the add operation")); return NULL;};
+variable * cpp_function_block_var::_sub			(variable * other){TypeError(this->print() + string(" does not support the sub operation")); return NULL;};
+variable * cpp_function_block_var::_mul			(variable * other){TypeError(this->print() + string(" does not support the mul operation")); return NULL;};
+variable * cpp_function_block_var::_div			(variable * other){TypeError(this->print() + string(" does not support the div operation")); return NULL;};
+variable * cpp_function_block_var::_unary_neg		(				 ){TypeError(this->print() + string(" does not support the unary_neg operation")); return NULL;};
+variable * cpp_function_block_var::_pow			(variable * other){TypeError(this->print() + string(" does not support the pow operation")); return NULL;};
+variable * cpp_function_block_var::_call			(variable * other){TypeError(this->print() + string(" does not support the call operation")); return NULL;};
+variable * cpp_function_block_var::_blockcall(variable * other, variable * block){
 	if(other->get_type() == "tuple_var"){
 		// variable * a = this->func(dynamic_cast<tuple_var *>(other));
-		variable * a = this->func(dynamic_cast<tuple_var *>(other));
+		variable * a = this->func(dynamic_cast<tuple_var *>(other), dynamic_cast<codeblock *>(block));
+		return a;
 	}else{
 		SyntaxError("INVALID FUNCTION CALL");
 	}
 };
-
 
 variable * function_var::_add			(variable * other){TypeError(this->print() + string(" does not support the add operation")); return NULL;};
 variable * function_var::_sub			(variable * other){TypeError(this->print() + string(" does not support the sub operation")); return NULL;};
@@ -400,6 +439,7 @@ variable * function_var::_call			(variable * other){
 	if(other->get_type() == "tuple_var"){
 		// variable * a = this->func(dynamic_cast<tuple_var *>(other));
 		execute(this->code);
+		return new None_var();
 	}else{
 		SyntaxError("INVALID FUNCTION CALL");
 	}
@@ -408,6 +448,7 @@ variable * function_var::_blockcall		(variable * other, variable * block){
 	if(other->get_type() == "tuple_var"){
 		// variable * a = this->func(dynamic_cast<tuple_var *>(other));
 		execute(this->code);
+		return new None_var();
 	}else{
 		SyntaxError("INVALID FUNCTION CALL");
 	}

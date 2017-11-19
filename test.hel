@@ -8,4 +8,4 @@
 p = function():
 	print("hey")
 
-p()
+print("hey2")

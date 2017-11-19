@@ -243,22 +243,26 @@ namespace compiler{
 				// codeblocks[blockpointer.top()]->add_instruction(ES);
 				block_counter++;
 				codeblocks[block_counter] = new codeblock();
+				codeblocks[block_counter]->code.push_back(ES);
 				blockpointer.push(block_counter);
 			
 			}else if(s->type == "DEDENT"){
 				codeblock * temp  = codeblocks[blockpointer.top()];
+				temp->code.push_back(LS);
+				temp->code.push_back(RET);
 				blockpointer.pop();
 				const_counter++;
 				codeblocks[blockpointer.top()]->add_constant(const_counter,temp);
 				lastblock.push(const_counter);
 			}else if(s->type == ":"){		
-				codeblocks[blockpointer.top()]->add_instruction(LC);
+				codeblocks[blockpointer.top()]->code.back() = LC;
 				value = lastblock.top();
 				lastblock.pop();
 				codeblocks[blockpointer.top()]->add_instruction((value >> 24) & 0xFF);
 				codeblocks[blockpointer.top()]->add_instruction((value >> 16) & 0xFF);
 				codeblocks[blockpointer.top()]->add_instruction((value >> 8) & 0xFF);
 				codeblocks[blockpointer.top()]->add_instruction(value & 0xFF);		
+				codeblocks[blockpointer.top()]->add_instruction(CALL);		
 			}
 			//operators	
 			else if(s->type == "="){
