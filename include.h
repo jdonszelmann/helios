@@ -15,8 +15,9 @@
 #define ES				0x0e
 #define LST				0x0f
 #define CALL			0x10
+#define TUP				0x11
 
-
+#define ____DEBUG____   false
 
 
 //datatypes

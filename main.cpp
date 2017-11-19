@@ -6,6 +6,7 @@
 #include <map>
 #include <cmath>
 #include <iterator>
+#include <stack>
 
 using namespace std;
 

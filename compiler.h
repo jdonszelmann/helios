@@ -1,6 +1,6 @@
- 
 #include "types.h"
 #include "block.h"
+#include "stl.h"
 #include "executer.h"
 
 stack<vector<unsigned char>> vars;
@@ -9,6 +9,107 @@ unsigned char value;
 bool wasvar;
 
 namespace {
+	void
+	decompile(codeblock * b){
+		for (int i = 0; i < b->code.size(); ++i)
+		{
+			char s = b->code[i];
+			switch(s){
+				case(NOP):{
+					cout<<"NOP"<<endl;
+					break;
+				}	     
+				case(STP):{
+					cout<<"STP"<<endl;
+					break;
+				}	     
+				case(LV):{
+					cout<<"LV"<<"  ";
+					cout<<to_string(b->code[i+1]);
+					cout<<to_string(b->code[i+2]);
+					cout<<to_string(b->code[i+3]);
+					cout<<to_string(b->code[i+4])<<endl;
+					i += 4;
+					break;
+				}	      
+				case(ADD):{
+					cout<<"ADD"<<endl;
+					break;
+				}	     
+				case(MUL):{
+					cout<<"MUL"<<endl;
+					break;
+				}	     
+				case(DIV):{
+					cout<<"DIV"<<endl;
+				}	     
+				case(SUB):{
+					cout<<"SUB"<<endl;
+					break;
+				}	     
+				case(LC):{
+					cout<<"LC"<<"  ";
+					cout<<to_string(b->code[i+1]);
+					cout<<to_string(b->code[i+2]);
+					cout<<to_string(b->code[i+3]);
+					cout<<to_string(b->code[i+4])<<endl;
+					i += 4;
+					break;
+				}	      
+				case(SV):{
+					cout<<"SV"<<"  ";
+					cout<<to_string(b->code[i+1]);
+					cout<<to_string(b->code[i+2]);
+					cout<<to_string(b->code[i+3]);
+					cout<<to_string(b->code[i+4])<<endl;
+					i += 4;
+					break;
+				}	      
+				case(PT):{
+					
+					break;
+				}	      
+				case(UNARY_NEG):{
+					cout<<"UNARY_NEG"<<endl;
+					break;
+				}       
+				case(TRUEDIV):{
+					cout<<"TRUEDIV"<<endl;
+					break;
+				}	 
+				case(POW):{
+					cout<<"POW"<<endl;
+					break;
+				}	     
+				case(ES):{
+					cout<<"ES"<<endl;
+					break;
+				}	      
+				case(LST):{
+					cout<<"LST"<<"  ";
+					cout<<to_string(b->code[i+1]);
+					cout<<to_string(b->code[i+2]);
+					cout<<to_string(b->code[i+3]);
+					cout<<to_string(b->code[i+4])<<endl;
+					i += 4;
+					break;
+				}     
+				case(CALL):{
+					cout<<"CALL"<<endl;
+				}	    
+				case(TUP):{
+					cout<<"TUP"<<"  ";
+					cout<<to_string(b->code[i+1]);
+					cout<<to_string(b->code[i+2]);
+					cout<<to_string(b->code[i+3]);
+					cout<<to_string(b->code[i+4])<<endl;
+					i += 4;
+					break;
+				}     
+			}
+		}
+	}
+
 	bool 
 	is_number(string line)
 	{
@@ -46,9 +147,15 @@ namespace compiler{
 	codeblock * global = new codeblock();
 	codeblock * current = global;
 	int const_counter;
-	int var_counter;
+	int var_counter = stl::stl_functions.size();
 
 	void compile(vector<instruction *> code){
+		for (int i = 0; i < stl::stl_function_names.size(); ++i)
+		{
+			varnames[stl::stl_function_names[i]] = i;
+		}
+
+
 		instruction * s;
 		instruction * sp;
 		for (int i = 0; i < code.size(); ++i)
@@ -59,48 +166,41 @@ namespace compiler{
 			}
 			if(s->type == "LITERAL"){
 				wasvar = false;
-				cout<<endl;
-				cout<<s->value<<endl;
 				//string
 				if(sp->type == "STRING"){
 					const_counter++;
 					current->add_constant(const_counter, new string_var(s->value));
-					cout<<"string"<<endl;
 				}
 				//float
 				else if(s->value.find('.') != std::string::npos && is_float_number(s->value) && sp->type != "STRING"){
 					const_counter++;
 					current->add_constant(const_counter,new float_var(atof(s->value.c_str())));
-					cout<<"float"<<endl;
 				}
 				//int
 				else if(s->value.find('.') == std::string::npos && is_number(s->value) && sp->type != "STRING"){
 					const_counter++;
 					current->add_constant(const_counter,new int_var(atoi(s->value.c_str())));
-					cout<<"int"<<endl;
 				}			
 				//variable
 				else{
 					wasvar = true;
-					cout<<"var"<<endl;
 					if(s->nextisequals){
 						vector<unsigned char> var;
-						s->value;
-						cout<<"--> "<<s<<endl;
+						var_counter++;
+						value = var_counter;
 						var.push_back((value >> 24) & 0xFF);
 						var.push_back((value >> 16) & 0xFF);
 						var.push_back((value >> 8) & 0xFF);
 						var.push_back(value & 0xFF);
 						vars.push(var);
-					}else{
-						var_counter++;
+						varnames[s->value] = var_counter;
+					}else{	
 						current->add_instruction(LV);
-						value = var_counter;
+						value = varnames[s->value];
 						current->add_instruction((value >> 24) & 0xFF);
 						current->add_instruction((value >> 16) & 0xFF);
 						current->add_instruction((value >> 8) & 0xFF);
 						current->add_instruction(value & 0xFF);
-						varnames[s.value] = var_counter
 					}
 				}
 				if(!wasvar){
@@ -114,15 +214,28 @@ namespace compiler{
 
 
 			}else if(s->type == "LIST"){
-				cout<<s->argument<<endl;
-				cout<<"list"<<endl;
 				current->add_instruction(LST);        
 				value = s->argument;
 				current->add_instruction((value >> 24) & 0xFF);
 				current->add_instruction((value >> 16) & 0xFF);
 				current->add_instruction((value >> 8) & 0xFF);
 				current->add_instruction(value & 0xFF);				
-			}			
+			}else if(s->type == "TUPLE"){		
+				current->add_instruction(TUP);        
+				value = s->argument;
+				current->add_instruction((value >> 24) & 0xFF);
+				current->add_instruction((value >> 16) & 0xFF);
+				current->add_instruction((value >> 8) & 0xFF);
+				current->add_instruction(value & 0xFF);
+			}else if(s->type == "CALL"){		
+				current->add_instruction(TUP);        
+				value = s->argument;
+				current->add_instruction((value >> 24) & 0xFF);
+				current->add_instruction((value >> 16) & 0xFF);
+				current->add_instruction((value >> 8) & 0xFF);
+				current->add_instruction(value & 0xFF);
+				current->add_instruction(CALL);        
+			}				
 			//operators	
 			else if(s->type == "="){
 				current->add_instruction(SV);
@@ -177,12 +290,16 @@ namespace compiler{
 			}
 		}
 		current->add_instruction(STP);
-		for(auto& i:current->code){
-			cout<<to_string(i);
+		if(____DEBUG____){
+			for(auto& i:current->code){
+				cout<<to_string(i);
+			}
+			cout<<endl;
+
+			for (auto& t : current->constants)
+	            cout << t.first << " " << t.second->print() <<endl;
+			decompile(current);
 		}
-		cout<<endl;
-		for (auto& t : current->constants)
-            cout << t.first << " " << t.second->print() <<endl;
 		execute(current);
 	}
 }

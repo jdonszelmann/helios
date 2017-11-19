@@ -40,6 +40,12 @@ class scope{
 		scope * parent_scope;
 		scope(scope * parent){
 
+		}		
+		scope(vector<variable *> v){
+			for (int i = 0; i < v.size(); ++i)
+			{
+				this->vars[i] = v[i];
+			}
 		}
 
 		void new_var(int name, variable * value){
@@ -47,7 +53,11 @@ class scope{
 		}
 
 		variable * get_var(int address){
-			return vars[address];
+			if(vars.find(address) != vars.end()){
+				return vars[address];
+			}else{
+				parent_scope->get_var(address);
+			}
 		}
 };
 
@@ -60,14 +70,16 @@ class Scopes{
 
 		}
 
-		void exit_scope(){
+		void 
+		exit_scope(){
 			if(this->scopes.top() == this->bottom){
 				this->bottom = NULL;
 			}
 			this->scopes.pop();
 		}
 
-		scope * current(){
+		scope * 
+		current(){
 			if (!this->scopes.empty()){
 				return this->scopes.top();
 			}else{
@@ -85,19 +97,15 @@ class Scopes{
 
 				this->scopes.push(new scope(this->scopes.top()));
 			}else{
-				this->scopes.push(new scope(NULL));
+				this->scopes.push(new scope(stl::stl_functions));
 			}
-
-
 		}
 };
 
 
 
-int concat(vector<int> vals){
-
-
-
+int 
+concat(vector<int> vals){
 	int val = vals[0];
 	for (int i = 1; i < vals.size();i++){
 		val<<=8;
@@ -106,7 +114,8 @@ int concat(vector<int> vals){
 	return val;
 }
 
-void execute(codeblock* block){
+void 
+execute(codeblock* block){
 
 	vector<unsigned char> program = block->code;
 	map<int,variable*> constants = block->constants;
@@ -118,13 +127,15 @@ void execute(codeblock* block){
 	
 	while(running){
 		int instruction = executor.next();
-		cout<< instruction<<endl;
-		cout<< frame<<endl;
+		if(____DEBUG____){
+			cout<< instruction<<endl;
+			cout<< frame<<endl;
+			// for (auto& i:scopes->current()->vars){
+			// 	cout << i.first << ":" << i.second->print() << "; ";
+			// }
+			// cout<<endl;
+		}
 
-		// for (auto& i:scopes->current()->vars){
-		// 	cout << i.first << ":" << i.second->print() << "; ";
-		// }
-		// cout<<endl;
 
 
 		switch(instruction){
@@ -180,6 +191,41 @@ void execute(codeblock* block){
 					frame.pop();
 				}
 				frame.push(new list_var(items));
+				break;
+			}
+
+			case TUP:{
+				vector<int> args;
+				vector<variable *> items;
+				for (int i = 0; i < 4; ++i)
+				{
+					args.push_back(executor.next());
+				}
+				for (int i = 0; i < concat(args); ++i)
+				{
+					items.push_back(frame.top());
+					frame.pop();
+				}
+				frame.push(new tuple_var(items));
+				break;
+			}
+
+			case CALL:{
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
+
+				variable * temp1 = frame.top();
+				frame.pop();
+				if(frame.empty()){
+					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
+				}
+				variable * temp2 = frame.top();
+				frame.pop();
+				variable * temp3 = temp2->_call(temp1);
+				if(temp3->get_type()!="None_var"){
+					frame.push(temp3);
+				}
 				break;
 			}
 

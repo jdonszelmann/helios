@@ -14,8 +14,26 @@ class variable{
 		virtual variable * _unary_neg	(				 );
 		virtual variable * _pow			(variable * other);
 		virtual variable * copy		 	(				 );
+		virtual variable * _call		(variable * other);
 };
 
+class None_var: public variable{
+	public:
+		None_var(){
+
+		}
+
+		virtual string print(){return (string)"None";};
+		virtual string get_type	(){return (string)"None_var";};
+		virtual variable * _add			(variable * other);
+		virtual variable * _sub			(variable * other);
+		virtual variable * _mul			(variable * other);
+		virtual variable * _div			(variable * other);
+		virtual variable * _unary_neg	(				 );
+		virtual variable * _pow			(variable * other);
+		virtual variable * copy		 	(				 );
+		virtual variable * _call		(variable * other);
+};
 
 ostream & operator<<(ostream & os, stack<variable *> my_stack) //function header
 {
@@ -82,7 +100,7 @@ class float_var: public variable{
 	public:
 		float val;
 
-		virtual string print(){return (string)"float object with value: " + to_string(val);}
+		virtual string print(){return to_string(val);}
 
 		float_var(float val = 0){
 			this->val = val;
@@ -101,6 +119,7 @@ class float_var: public variable{
 		virtual variable * copy		 	(				 ){
 			return new float_var(this->val);
 		};
+		virtual variable * _call		(variable * other);
 };
 
 
@@ -112,7 +131,7 @@ class int_var: public variable{
 			this->val = val;
 		}
 
-		virtual string print(){return (string)"int object with value: " + to_string(val);}
+		virtual string print(){return to_string(val);}
 
 		virtual string get_type(){
 			return (string)"int_var";
@@ -127,6 +146,7 @@ class int_var: public variable{
 		virtual variable * copy		 	(				 ){
 			return new int_var(this->val);
 		};
+		virtual variable * _call		(variable * other);
 };
 
 class list_var: public variable{
@@ -146,12 +166,13 @@ class list_var: public variable{
 		}
 
 		virtual string print(){
-			string ret = "list object with value: [";
+			string ret = "[";
 			for (int i = 0; i < this->vals.size(); ++i)
 			{
 				ret += this->vals.at(i)->print();
 				ret += ", ";
 			}
+			ret  = ret.substr(0, ret.size()-1);
 			ret += "]";
 			return ret;
 		}
@@ -169,7 +190,54 @@ class list_var: public variable{
 		virtual variable * copy		 	(				 ){
 			return new list_var(this->vals);
 		};
+		virtual variable * _call		(variable * other);
 };
+
+
+class tuple_var: public variable{
+	public:
+		vector<variable *> vals;
+
+		tuple_var(vector<variable *> vals){
+			this->vals = vals;
+		}
+
+		tuple_var(){
+			this->vals = {};
+		}
+
+		void from_vector(vector<variable *> items){
+			this->vals = items;
+		}
+
+		virtual string print(){
+			string ret = "(";
+			for (int i = 0; i < this->vals.size(); ++i)
+			{
+				ret += this->vals.at(i)->print();
+				ret += ", ";
+			}
+			ret = ret.substr(0, ret.size()-2);
+			ret += ")";
+			return ret;
+		}
+
+		virtual string get_type(){
+			return (string)"tuple_var";
+		}
+
+		virtual variable * _add			(variable * other);
+		virtual variable * _sub			(variable * other); 
+		virtual variable * _mul			(variable * other);
+		virtual variable * _div			(variable * other);
+		virtual variable * _unary_neg	(				 );
+		virtual variable * _pow			(variable * other);
+		virtual variable * copy		 	(				 ){
+			return new tuple_var(this->vals);
+		};
+		virtual variable * _call		(variable * other);
+};
+
 
 class string_var: public variable{
 	public:
@@ -188,7 +256,7 @@ class string_var: public variable{
 		}
 
 		virtual string print(){
-			string ret = "string object with value: \"";
+			string ret = "\"";
 			ret += this->val;
 			ret += "\"";
 			return ret;
@@ -207,13 +275,35 @@ class string_var: public variable{
 		virtual variable * copy		 	(				 ){
 			return new string_var(this->val);
 		};
+		virtual variable * _call		(variable * other);
 };
 
 
-class function_var: public variable{
+class cpp_function_var: public variable{
+	public:
+		variable * (* func)(tuple_var *);
+		cpp_function_var(variable * (*func)(tuple_var *)){
+			this->func = func;
+		}
 
+		virtual string print(){
+			return"cpp_function object";
+		}
 
+		virtual string get_type(){
+			return (string)"cpp_function_var";
+		}
 
+		virtual variable * _add			(variable * other);
+		virtual variable * _sub			(variable * other); 
+		virtual variable * _mul			(variable * other);
+		virtual variable * _div			(variable * other);
+		virtual variable * _unary_neg	(				 );
+		virtual variable * _pow			(variable * other);
+		virtual variable * copy		 	(				 ){
+			return new cpp_function_var(this->func);
+		};
+		virtual variable * _call		(variable * other);
 };
 
 string variable::get_type			(				 ){TypeError(this->print() + string(" does not support the get_type operation")); return NULL;};
@@ -224,7 +314,30 @@ variable * variable::_div			(variable * other){TypeError(this->print() + string(
 variable * variable::_unary_neg		(				 ){TypeError(this->print() + string(" does not support the unary_neg operation")); return NULL;};
 variable * variable::_pow			(variable * other){TypeError(this->print() + string(" does not support the pow operation")); return NULL;};
 variable * variable::copy			(				 ){TypeError(this->print() + string(" does not support the pow operation")); return NULL;};
+variable * variable::_call			(variable * other){TypeError(this->print() + string(" does not support the pow operation")); return NULL;};
 
+variable * None_var::_add			(variable * other){TypeError(this->print() + string(" does not support the add operation")); return NULL;};
+variable * None_var::_sub			(variable * other){TypeError(this->print() + string(" does not support the sub operation")); return NULL;};
+variable * None_var::_mul			(variable * other){TypeError(this->print() + string(" does not support the mul operation")); return NULL;};
+variable * None_var::_div			(variable * other){TypeError(this->print() + string(" does not support the div operation")); return NULL;};
+variable * None_var::_unary_neg		(				 ){TypeError(this->print() + string(" does not support the unary_neg operation")); return NULL;};
+variable * None_var::_pow			(variable * other){TypeError(this->print() + string(" does not support the pow operation")); return NULL;};
+variable * None_var::copy			(				 ){TypeError(this->print() + string(" does not support the pow operation")); return NULL;};
+variable * None_var::_call			(variable * other){TypeError(this->print() + string(" does not support the pow operation")); return NULL;};	
+
+variable * cpp_function_var::_add			(variable * other){TypeError(this->print() + string(" does not support the add operation")); return NULL;};
+variable * cpp_function_var::_sub			(variable * other){TypeError(this->print() + string(" does not support the sub operation")); return NULL;};
+variable * cpp_function_var::_mul			(variable * other){TypeError(this->print() + string(" does not support the mul operation")); return NULL;};
+variable * cpp_function_var::_div			(variable * other){TypeError(this->print() + string(" does not support the div operation")); return NULL;};
+variable * cpp_function_var::_unary_neg		(				 ){TypeError(this->print() + string(" does not support the unary_neg operation")); return NULL;};
+variable * cpp_function_var::_pow			(variable * other){TypeError(this->print() + string(" does not support the pow operation")); return NULL;};
+variable * cpp_function_var::_call			(variable * other){
+	if(other->get_type() == "tuple_var"){
+		variable * a = this->func(dynamic_cast<tuple_var *>(other));
+	}else{
+		SyntaxError("INVALID FUNCTION CALL");
+	}
+};
 
 
 variable * list_var::_add(variable * other){
@@ -265,6 +378,45 @@ variable * list_var::_pow(variable * other){
 	TypeError(this->print() + string("does not support the pow operation"));
 	return NULL;
 }
+variable * list_var::_call(variable * other){
+	TypeError(this->print() + string("does not support the call operation"));
+	return NULL;
+}
+
+
+variable * tuple_var::_add(variable * other){
+	TypeError(this->print() + string("does not support the add operation on objects other than tuple_var"));
+	return NULL;
+}
+
+variable * tuple_var::_sub(variable * other){
+	TypeError(this->print() + string("does not support the sub operation"));
+	return NULL;
+}
+
+variable * tuple_var::_mul(variable * other){
+	TypeError(this->print() + string("does not support the mul operation"));
+	return NULL;
+}
+
+variable * tuple_var::_div(variable * other){
+	TypeError(this->print() + string("does not support the div operation"));
+	return NULL;
+}
+
+variable * tuple_var::_unary_neg(){
+	TypeError(this->print() + string("does not support the unary_neg operation"));
+	return NULL;
+}
+
+variable * tuple_var::_pow(variable * other){
+	TypeError(this->print() + string("does not support the pow operation"));
+	return NULL;
+}
+variable * tuple_var::_call(variable * other){
+	TypeError(this->print() + string("does not support the call operation"));
+	return NULL;
+}
 
 variable * string_var::_add(variable * other){
 	if(other->get_type() == "string_var"){
@@ -301,6 +453,10 @@ variable * string_var::_unary_neg(){
 
 variable * string_var::_pow(variable * other){
 	TypeError(this->print() + string("does not support the pow operation"));
+	return NULL;
+}
+variable * string_var::_call(variable * other){
+	TypeError(this->print() + string("does not support the call operation"));
 	return NULL;
 }
 
@@ -354,7 +510,10 @@ variable * float_var::_pow(variable * other){
 	}
 	return NULL;
 }
-
+variable * float_var::_call(variable * other){
+	TypeError(this->print() + string("does not support the call operation"));
+	return NULL;
+}
 
 
 variable * int_var::_add(variable * other){
@@ -408,4 +567,7 @@ variable * int_var::_pow(variable * other){
 	return NULL;
 }
 
-
+variable * int_var::_call(variable * other){
+	TypeError(this->print() + string("does not support the call operation"));
+	return NULL;
+}
