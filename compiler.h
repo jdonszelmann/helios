@@ -1,8 +1,3 @@
-#include "types.h"
-#include "block.h"
-#include "stl.h"
-#include "executer.h"
-
 stack<vector<unsigned char>> vars;
 map<string,int> varnames;
 unsigned char value;
@@ -96,6 +91,7 @@ namespace {
 				}     
 				case(CALL):{
 					cout<<"CALL"<<endl;
+					break;
 				}	    
 				case(TUP):{
 					cout<<"TUP"<<"  ";
@@ -144,12 +140,18 @@ namespace {
 
 
 namespace compiler{
-	codeblock * global = new codeblock();
-	codeblock * current = global;
-	int const_counter;
-	int var_counter = stl::stl_functions.size();
-
 	void compile(vector<instruction *> code){
+		int const_counter = 0;
+		int block_counter = 0;
+		int var_counter = stl::stl_functions.size();
+		
+		stack<int> blockpointer;
+		stack<int> lastblock;
+		map<int,codeblock *> codeblocks;
+		codeblocks[block_counter] = new codeblock();
+		blockpointer.push(block_counter);
+
+
 		for (int i = 0; i < stl::stl_function_names.size(); ++i)
 		{
 			varnames[stl::stl_function_names[i]] = i;
@@ -169,17 +171,17 @@ namespace compiler{
 				//string
 				if(sp->type == "STRING"){
 					const_counter++;
-					current->add_constant(const_counter, new string_var(s->value));
+					codeblocks[blockpointer.top()]->add_constant(const_counter, new string_var(s->value));
 				}
 				//float
 				else if(s->value.find('.') != std::string::npos && is_float_number(s->value) && sp->type != "STRING"){
 					const_counter++;
-					current->add_constant(const_counter,new float_var(atof(s->value.c_str())));
+					codeblocks[blockpointer.top()]->add_constant(const_counter,new float_var(atof(s->value.c_str())));
 				}
 				//int
 				else if(s->value.find('.') == std::string::npos && is_number(s->value) && sp->type != "STRING"){
 					const_counter++;
-					current->add_constant(const_counter,new int_var(atoi(s->value.c_str())));
+					codeblocks[blockpointer.top()]->add_constant(const_counter,new int_var(atoi(s->value.c_str())));
 				}			
 				//variable
 				else{
@@ -195,59 +197,81 @@ namespace compiler{
 						vars.push(var);
 						varnames[s->value] = var_counter;
 					}else{	
-						current->add_instruction(LV);
+						codeblocks[blockpointer.top()]->add_instruction(LV);
 						value = varnames[s->value];
-						current->add_instruction((value >> 24) & 0xFF);
-						current->add_instruction((value >> 16) & 0xFF);
-						current->add_instruction((value >> 8) & 0xFF);
-						current->add_instruction(value & 0xFF);
+						codeblocks[blockpointer.top()]->add_instruction((value >> 24) & 0xFF);
+						codeblocks[blockpointer.top()]->add_instruction((value >> 16) & 0xFF);
+						codeblocks[blockpointer.top()]->add_instruction((value >> 8) & 0xFF);
+						codeblocks[blockpointer.top()]->add_instruction(value & 0xFF);
 					}
 				}
 				if(!wasvar){
-					current->add_instruction(LC);
+					codeblocks[blockpointer.top()]->add_instruction(LC);
 					value = const_counter;
-					current->add_instruction((value >> 24) & 0xFF);
-					current->add_instruction((value >> 16) & 0xFF);
-					current->add_instruction((value >> 8) & 0xFF);
-					current->add_instruction(value & 0xFF);					
+					codeblocks[blockpointer.top()]->add_instruction((value >> 24) & 0xFF);
+					codeblocks[blockpointer.top()]->add_instruction((value >> 16) & 0xFF);
+					codeblocks[blockpointer.top()]->add_instruction((value >> 8) & 0xFF);
+					codeblocks[blockpointer.top()]->add_instruction(value & 0xFF);					
 				}
 
 
 			}else if(s->type == "LIST"){
-				current->add_instruction(LST);        
+				codeblocks[blockpointer.top()]->add_instruction(LST);        
 				value = s->argument;
-				current->add_instruction((value >> 24) & 0xFF);
-				current->add_instruction((value >> 16) & 0xFF);
-				current->add_instruction((value >> 8) & 0xFF);
-				current->add_instruction(value & 0xFF);				
+				codeblocks[blockpointer.top()]->add_instruction((value >> 24) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction((value >> 16) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction((value >> 8) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction(value & 0xFF);				
 			}else if(s->type == "TUPLE"){		
-				current->add_instruction(TUP);        
+				codeblocks[blockpointer.top()]->add_instruction(TUP);        
 				value = s->argument;
-				current->add_instruction((value >> 24) & 0xFF);
-				current->add_instruction((value >> 16) & 0xFF);
-				current->add_instruction((value >> 8) & 0xFF);
-				current->add_instruction(value & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction((value >> 24) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction((value >> 16) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction((value >> 8) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction(value & 0xFF);
 			}else if(s->type == "CALL"){		
-				current->add_instruction(TUP);        
+				codeblocks[blockpointer.top()]->add_instruction(TUP);        
 				value = s->argument;
-				current->add_instruction((value >> 24) & 0xFF);
-				current->add_instruction((value >> 16) & 0xFF);
-				current->add_instruction((value >> 8) & 0xFF);
-				current->add_instruction(value & 0xFF);
-				current->add_instruction(CALL);        
-			}				
+				codeblocks[blockpointer.top()]->add_instruction((value >> 24) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction((value >> 16) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction((value >> 8) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction(value & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction(CALL);        
+			}
+			//functions
+			else if(s->type == "INDENT"){
+				// codeblocks[blockpointer.top()]->add_instruction(ES);
+				block_counter++;
+				codeblocks[block_counter] = new codeblock();
+				blockpointer.push(block_counter);
+			
+			}else if(s->type == "DEDENT"){
+				codeblock * temp  = codeblocks[blockpointer.top()];
+				blockpointer.pop();
+				const_counter++;
+				codeblocks[blockpointer.top()]->add_constant(const_counter,temp);
+				lastblock.push(const_counter);
+			}else if(s->type == ":"){		
+				codeblocks[blockpointer.top()]->add_instruction(LC);
+				value = lastblock.top();
+				lastblock.pop();
+				codeblocks[blockpointer.top()]->add_instruction((value >> 24) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction((value >> 16) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction((value >> 8) & 0xFF);
+				codeblocks[blockpointer.top()]->add_instruction(value & 0xFF);		
+			}
 			//operators	
 			else if(s->type == "="){
-				current->add_instruction(SV);
-				current->add_instruction(vars.top().at(0));
-				current->add_instruction(vars.top().at(1));
-				current->add_instruction(vars.top().at(2));
-				current->add_instruction(vars.top().at(3));
+				codeblocks[blockpointer.top()]->add_instruction(SV);
+				codeblocks[blockpointer.top()]->add_instruction(vars.top().at(0));
+				codeblocks[blockpointer.top()]->add_instruction(vars.top().at(1));
+				codeblocks[blockpointer.top()]->add_instruction(vars.top().at(2));
+				codeblocks[blockpointer.top()]->add_instruction(vars.top().at(3));
 				vars.pop();  
 			}
 			//+
 			else if(s->type == "+"){
-				current->add_instruction(ADD);
+				codeblocks[blockpointer.top()]->add_instruction(ADD);
 			}else if(s->type == "++"){
 				
 			}else if(s->type == "+="){
@@ -255,19 +279,19 @@ namespace compiler{
 			}
 			//-
 			else if(s->type == "-"){
-				current->add_instruction(SUB);
+				codeblocks[blockpointer.top()]->add_instruction(SUB);
 			}else if(s->type == "--"){
 				
 			}else if(s->type == "-="){
 				
 			}else if(s->type == "NEG"){
-				current->add_instruction(UNARY_NEG);
+				codeblocks[blockpointer.top()]->add_instruction(UNARY_NEG);
 			}
 			//*
 			else if(s->type == "*"){
-				current->add_instruction(MUL);
+				codeblocks[blockpointer.top()]->add_instruction(MUL);
 			}else if(s->type == "**"){
-				current->add_instruction(POW);
+				codeblocks[blockpointer.top()]->add_instruction(POW);
 			}
 			else if(s->type == "*="){
 				
@@ -277,9 +301,9 @@ namespace compiler{
 			}
 			// /
 			else if(s->type == "/"){
-				current->add_instruction(DIV);
+				codeblocks[blockpointer.top()]->add_instruction(DIV);
 			}else if(s->type == "//"){
-				current->add_instruction(TRUEDIV);	
+				codeblocks[blockpointer.top()]->add_instruction(TRUEDIV);	
 			}else if(s->type == "/="){
 				
 			}			
@@ -289,17 +313,17 @@ namespace compiler{
 				//
 			}
 		}
-		current->add_instruction(STP);
+		codeblocks[blockpointer.top()]->add_instruction(STP);
 		if(____DEBUG____){
-			for(auto& i:current->code){
+			for(auto& i:codeblocks[blockpointer.top()]->code){
 				cout<<to_string(i);
 			}
 			cout<<endl;
 
-			for (auto& t : current->constants)
+			for (auto& t : codeblocks[blockpointer.top()]->constants)
 	            cout << t.first << " " << t.second->print() <<endl;
-			decompile(current);
+			decompile(codeblocks[blockpointer.top()]);
 		}
-		execute(current);
+		execute(codeblocks[blockpointer.top()]);
 	}
 }

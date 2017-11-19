@@ -220,12 +220,27 @@ execute(codeblock* block){
 				if(frame.empty()){
 					SyntaxError("frame was empty early. there was probably a mistake in your code. (too many operators)");
 				}
-				variable * temp2 = frame.top();
-				frame.pop();
-				variable * temp3 = temp2->_call(temp1);
-				if(temp3->get_type()!="None_var"){
-					frame.push(temp3);
+				if(frame.top()->get_type() == "block"){
+					variable * temp2 = frame.top();
+					frame.pop();
+
+					variable * temp3 = frame.top();
+					frame.pop();
+
+					variable * temp4 = temp3->_blockcall(temp1,temp2);
+					if(temp3->get_type()!="None_var"){
+						frame.push(temp3);
+					}
+				}else{
+					variable * temp2 = frame.top();
+					frame.pop();
+
+					variable * temp3 = temp2->_call(temp1);
+					if(temp3->get_type()!="None_var"){
+						frame.push(temp3);
+					}
 				}
+
 				break;
 			}
 

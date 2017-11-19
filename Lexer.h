@@ -17,6 +17,7 @@ class instruction{
 };
 
 stack<instruction *> postfixstack;
+stack<stack<instruction *>> blockstack;
 stack<int> bracketstack;
 vector<instruction *> output;
 stack<int> lastbracketwaspostfix;
@@ -31,6 +32,29 @@ string s, sp, sm;
 
 
 namespace {
+
+	void popempty(){
+		while(!postfixstack.empty()){
+			output.push_back(postfixstack.top());
+			postfixstack.pop();
+		}		
+	}
+
+	void
+	newblock(){
+		blockstack.push(postfixstack);
+		while(!postfixstack.empty()){
+			postfixstack.pop();
+		}
+	}	
+	void
+	oldblock(){
+		popempty();
+		postfixstack = blockstack.top();
+		blockstack.pop();
+		popempty();
+	}
+
 	void calctabdepth(){
 		currenttabdepth += 1;
 		if(currenttabdepth > tabdepth){
@@ -41,6 +65,7 @@ namespace {
 	void calctabdepthend(){
 		if(currenttabdepth < tabdepth){
 			output.push_back(new instruction("DEDENT", sp=="="));
+			oldblock();
 		}else{
 			return;
 		}
@@ -218,13 +243,6 @@ namespace {
 
 		return ismath;
 	}
-
-	void popempty(){
-		while(!postfixstack.empty()){
-			output.push_back(postfixstack.top());
-			postfixstack.pop();
-		}		
-	}
 }
 
 
@@ -262,13 +280,15 @@ namespace lexer{
 			//brackets opening
 			else 	if(s == "["&& !stringopen											)	{		bracketstack.push(1);																															}
 			else 	if(s == "{"&& !stringopen											)	{		bracketstack.push(1);																															}
+			else 	if(s == "("	&& sp == ")" && !stringopen && sm == "="				)	{i+=1; output.push_back(new instruction("TUPLE",sp=="=",0));																							}
+			else 	if(s == "("	&& sp == ")" && !stringopen && sm != "="				)	{i+=1; output.push_back(new instruction("CALL",sp=="=",0));																								}
 			else 	if(s == "("	&& !ismathbracket(str,i) && !stringopen && sm != "="	)	{		bracketstack.push(1);	lastbracketwaspostfix.push(1);	postfixstack.push(new instruction("CALLS", sp=="="));									}
 			else 	if(s == "("	&& !ismathbracket(str,i) && !stringopen	&& sm == "="	)	{		bracketstack.push(1);	lastbracketwaspostfix.push(0);																							}
 			else 	if(s == "("	&&  ismathbracket(str,i) && !stringopen					)	{		postfixstack.push(new instruction("(",sp=="="));	lastbracketwaspostfix.push(2);																}
 			else 	if(s == "'"&& !stringopen											)	{		bracketstack.push(1);	stringopen = !stringopen	;																							}
 			else 	if(s == "\""&& !stringopen											)	{		bracketstack.push(1);	stringopen = !stringopen	;																							}
 			//block
-			else 	if(s == ":"	&& !stringopen											)	{		popuntilequal(":");		output.push_back(new instruction(":",sp=="="));																			}
+			else 	if(s == ":"	&& !stringopen											)	{		postfixstack.push(new instruction(":",sp=="=")); newblock();																					}
 			//assignment			
 			else 	if(s == "=" && sp != "="	&& !stringopen							)	{		popuntilequal("=");		postfixstack.push(new instruction("=",sp=="="));																		}
 			//lists

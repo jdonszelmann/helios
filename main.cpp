@@ -15,6 +15,7 @@ using namespace std;
 #include "tools.h"
 #include "filereader.h"
 #include "lexer.h"
+#include "types.h"
 #include "compiler.h"
 
 

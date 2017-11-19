@@ -17,7 +17,7 @@
 #define CALL			0x10
 #define TUP				0x11
 
-#define ____DEBUG____  false
+#define ____DEBUG____  true
 
 
 //datatypes

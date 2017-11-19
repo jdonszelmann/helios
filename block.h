@@ -1,10 +1,12 @@
 
-class codeblock{
+class codeblock: public variable{
 	public:
 		vector<unsigned char> code;
 		map<int,variable *> constants;
-		vector<codeblock *> children;
-		codeblock * parent;
+
+		virtual string get_type(){
+			return (string)"block";
+		}
 
 		codeblock(vector<unsigned char> code, map<int, variable *> constants){
 			this->constants = constants;
@@ -18,11 +20,5 @@ class codeblock{
 
 		void add_constant(int item, variable * var){
 			this->constants[item] = var;
-		}
-
-		codeblock * add_codeblock(){
-			codeblock * c = new codeblock();
-			this->children.push_back(c);
-			return c;
 		}
 };

@@ -1,5 +1,11 @@
 
 # a = input("what is your name?")
 # print("hello " + a)
-a = input("type a number")
-print(a + "+3 = " + str(int(a) + 3))
+# a = input("type a number")
+# print(a + "+3 = " + str(int(a) + 3))
+
+
+p = function():
+	print("hey")
+
+p()
