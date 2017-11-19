@@ -89,7 +89,8 @@ namespace {
 			case str2int("TUPLE"):{return 100;	}
 			case str2int("DICT"):{return 100;	}
 			case str2int("LIST"):{return 100;	}
-			case str2int("CALL"):{return 101;	}
+			case str2int("CALL"):{return 1;	}
+			case str2int("CALLS"):{return 0;	}
 
 			// .
 			case str2int(".")	:{return 9;	}
@@ -136,7 +137,7 @@ namespace {
 		cout<<"printing stack"<<endl;
 		for (int i = 0; i < stck.size(); ++i)
 		{
-			cout<<stck.top();
+			cout<<stck.top()->type;
 			stck.pop();
 		}
 		cout<<"          "<<s<<endl;
@@ -153,6 +154,9 @@ namespace {
 			postfixstack.pop();
 		}
 		if(postfixstack.top()->type == "("){
+			postfixstack.pop();
+		}		
+		if(postfixstack.top()->type == "CALLS"){
 			postfixstack.pop();
 		}
 	}
@@ -236,6 +240,11 @@ namespace lexer{
 			s 	= str.substr	(		i,	1		);
 			sp	= nextnotspace	(str,	i,	true	);
 			sm	= nextnotspace	(str,	i,	false	);
+			
+			if(____DEBUG____){
+				printstack(postfixstack);
+			}
+
 			if(stringopen){
 				bracketstack.top() += 1;
 			}
@@ -246,16 +255,16 @@ namespace lexer{
 					if(s == "]"	&& !stringopen											)	{		popuntilequal("LIST"); postfixstack.push(new instruction("LIST", sp=="=",bracketstack.top())); bracketstack.pop();								}
 			else 	if(s == "}"	&& !stringopen											)	{		popuntilequal("DICT"); postfixstack.push(new instruction("DICT", sp=="=",bracketstack.top())); bracketstack.pop();								}
 			else 	if(s == ")"	&& lastbracketwaspostfix.top()	== 0					)	{		popuntilequal("TUPLE"); postfixstack.push(new instruction("TUPLE", sp=="=",bracketstack.top())); bracketstack.pop();lastbracketwaspostfix.pop();}
-			else 	if(s == ")"	&& lastbracketwaspostfix.top()	== 1					)	{		popuntilequal("CALL"); postfixstack.push(new instruction("CALL", sp=="=",bracketstack.top())); bracketstack.pop(); lastbracketwaspostfix.pop();}
+			else 	if(s == ")"	&& lastbracketwaspostfix.top()	== 1					)	{		popuntil("CALLS");	postfixstack.push(new instruction("CALL", sp=="=",bracketstack.top())); bracketstack.pop(); lastbracketwaspostfix.pop();	}
 			else 	if(s == ")"	&& lastbracketwaspostfix.top() == 2						)	{		popuntil("(");																				lastbracketwaspostfix.pop();						}
 			else 	if(s == "'" && stringopen && sm != "\\"								)	{					 output.push_back(new instruction("STRING",sp=="=",bracketstack.top()-2)); bracketstack.pop();stringopen = !stringopen;				}
 			else 	if(s == "\"" && stringopen && sm != "\\"							)	{					 output.push_back(new instruction("STRING",sp=="=",bracketstack.top()-2)); bracketstack.pop();stringopen = !stringopen;				}
 			//brackets opening
 			else 	if(s == "["&& !stringopen											)	{		bracketstack.push(1);																															}
 			else 	if(s == "{"&& !stringopen											)	{		bracketstack.push(1);																															}
-			else 	if(s == "("	&& !ismathbracket(str,i) && !stringopen && sm != "="	)	{		bracketstack.push(1);	lastbracketwaspostfix.push(1);																						}
-			else 	if(s == "("	&& !ismathbracket(str,i) && !stringopen	&& sm == "="	)	{		bracketstack.push(1);	lastbracketwaspostfix.push(0);																						}
-			else 	if(s == "("	&&  ismathbracket(str,i) && !stringopen					)	{		postfixstack.push(new instruction("(",sp=="="));	lastbracketwaspostfix.push(2);															}
+			else 	if(s == "("	&& !ismathbracket(str,i) && !stringopen && sm != "="	)	{		bracketstack.push(1);	lastbracketwaspostfix.push(1);	postfixstack.push(new instruction("CALLS", sp=="="));									}
+			else 	if(s == "("	&& !ismathbracket(str,i) && !stringopen	&& sm == "="	)	{		bracketstack.push(1);	lastbracketwaspostfix.push(0);																							}
+			else 	if(s == "("	&&  ismathbracket(str,i) && !stringopen					)	{		postfixstack.push(new instruction("(",sp=="="));	lastbracketwaspostfix.push(2);																}
 			else 	if(s == "'"&& !stringopen											)	{		bracketstack.push(1);	stringopen = !stringopen	;																							}
 			else 	if(s == "\""&& !stringopen											)	{		bracketstack.push(1);	stringopen = !stringopen	;																							}
 			//block

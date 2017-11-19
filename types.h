@@ -256,9 +256,9 @@ class string_var: public variable{
 		}
 
 		virtual string print(){
-			string ret = "\"";
+			string ret = "";
 			ret += this->val;
-			ret += "\"";
+			ret += "";
 			return ret;
 		}
 
@@ -421,8 +421,7 @@ variable * tuple_var::_call(variable * other){
 variable * string_var::_add(variable * other){
 	if(other->get_type() == "string_var"){
 		string_var *other_t = dynamic_cast<string_var *>(other);
-		this->val += other_t->val;
-		return this;
+		return new string_var(this->val + other_t->val);
 	}
 	TypeError(this->print() + string("does not support the add operation on objects other than list_var"));
 	return NULL;

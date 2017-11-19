@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iterator>
 #include <stack>
+#include <stdlib.h>
 
 using namespace std;
 
