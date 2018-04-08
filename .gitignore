@@ -1,0 +1,8 @@
+*.o
+*.out
+*.gch
+*.a
+*.so
+*.iso
+*~
+*.exe
