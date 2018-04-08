@@ -70,7 +70,12 @@ BaseObject * IntegerObject_Add(BaseObject * self_tmp,BaseObject * other_tmp){
 	if(self_tmp->object_type->typename != "int"){
 		//exception handler
 	}
-	if(other_tmp->object_type->typename != "int"){
+	if(other_tmp->object_type->typename == "int"){
+		
+
+	}else if(0){//float
+		//integer-float addition
+	}else{
 		//exception handler
 	}
 	// IntegerObject * o = (IntegerObject *)o_tmp;
