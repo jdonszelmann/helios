@@ -12,12 +12,13 @@
 int main(int argc, char *argv[]){
 	BaseObject * a = IntegerObject_Fromstring("99");
 	BaseObject * b = IntegerObject_Fromstring("99");
-	printf("%li\n", IntegerObject_Tolong(a));
-	printf("%li\n", IntegerObject_Tolong(b));
+	
+	printf("%ld\n", IntegerObject_Tolong(a));
+	printf("%ld\n", IntegerObject_Tolong(b));
 
-	printf("%s\n",IntegerObject_Repr(IntegerObject_Add(a,b)));
+	printf("%s\n",IntegerObject_Repr(IntegerObject_BinaryAdd(a,b)));
 	DECREF(a);
-
+	DECREF(b);
 
 	return 0;
 }

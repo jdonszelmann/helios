@@ -6,6 +6,7 @@ TypeObject BaseObjectType = {
 	"BaseObject",
 	sizeof (BaseObject),
 	0,
+	0,
 	0
 };
 
@@ -14,6 +15,11 @@ TypeObject VarBaseObjectType = {
 	"BaseObject",
 	sizeof (VarBaseObject),
 	0,
+	0,
 	0
 };
+
+int OBJCHECKTYPE(BaseObject * o, char * type){
+	return strcmp(o->object_type->typename,type) == 0;
+}
 

@@ -10,181 +10,189 @@
 #include <Foxlang.h>
 
 
-
-TypeObject IntegerType = {
-	VarBaseObject_HEAD_INIT(&BaseObjectType,0)
-	"int",
-	sizeof (IntegerObject),
-	0,
-	0
-};
-
-IntegerObject * IntegerObject_Init(int startsize){
-	IntegerObject * a = malloc(sizeof(IntegerObject));
-	*a = (IntegerObject) {
-		BaseObject_HEAD_INIT(&IntegerType)
-		malloc(sizeof(unsigned char)*startsize),
-		startsize,
-		1
-	};
-	return a;
-}
-
-void IntegerObject_Resize(BaseObject * i_tmp, int length){
-	IntegerObject * i = (IntegerObject *)i_tmp;
-	i->length = length;
-	i->value = realloc(i->value, ceil((length*sizeof(unsigned char))/2));
-}
-
-
 BaseObject * IntegerObject_Fromstring(char * value){
-	int size = strlen(value);
-	printf("size %i\n", size);
-	IntegerObject * a = IntegerObject_Init(size);
+	IntegerObject * a = IntegerObject_Init(0);
 
-	int lower = -1;
-	int i;
+	#ifdef ENV64BIT
+	a->value = strtoull(value, NULL, 10);
+	#endif
+	#ifdef ENV32BIT
+	a->value = strtoul(value, NULL, 10);
+	#endif
 
-	// packing unsigned chars as
-	// lower:higher (4:4)
-
-	for (i = 0; i < size; ++i)
-	{
-		char substr[2];
-		strncpy(substr, value+i, 1);
-		unsigned char ret = (unsigned char)strtol(substr, NULL, 10);
-		assert(ret < 16 && ret > 0);
-		
-		if(lower == -1){
-			lower = ret;
-		}else{
-			a->value[(int)floor(i/2)] = (unsigned char)(lower + (ret<<4));
-			lower = -1;
-		}
+	if(errno == ERANGE){
+		//exception handler
 	}
-	
-	if(lower != -1){
-		a->value[i+1] = lower;
-	}
-
 	return (BaseObject *)a;
 }
 
 char * IntegerObject_Repr(BaseObject * o_tmp){
-
 	IntegerObject * o = (IntegerObject *)o_tmp;
-	char * largebuffer = malloc(ceil(((o->length)*sizeof(unsigned char)) / 2) + 5);
+	char * buffer = malloc(24 * sizeof(char));
 	if(o->sign == -1){
-		strcpy(largebuffer,"-");
+		strcpy(buffer,"-");
+		buffer++;
 	}else{
-		strcpy(largebuffer,"");
+		strcpy(buffer,"");
 	}
-	int lower = 0;
-	for(int i = 0; i < o->length; i++){
-		char buffer[2];
-		if(lower == 0){		
-			sprintf(buffer,"%u", o->value[(int)floor(i/2)] & 0x0F);
-			lower = 1;
-		}else{
-			sprintf(buffer,"%u", (o->value[(int)floor(i/2)] & 0xF0) >> 4);
-			lower = 0;
-		}
-		strcat(largebuffer,buffer);
+
+	#ifdef ENV64BIT
+	sprintf(buffer,"%lld", (long long)(o->value));
+	#endif
+	
+	#ifdef ENV32BIT
+	sprintf(buffer,"%ld", (long)(o->value));
+	#endif
+
+	if(o->sign == -1){
+		buffer--;
 	}
-	return largebuffer;
+	return buffer;
 }
 
-BaseObject * IntegerObject_Add(BaseObject * self_tmp,BaseObject * other_tmp){
-	if(self_tmp->object_type->typename != "int"){
+BaseObject * IntegerObject_BinaryAdd(BaseObject * self_tmp,BaseObject * other_tmp){
+	if(!OBJCHECKTYPE(self_tmp,"integer")){
 		//exception handler
 	}
 	IntegerObject * self = (IntegerObject *)self_tmp; 
-	if(other_tmp->object_type->typename == "int"){
+	if(OBJCHECKTYPE(other_tmp,"integer")){
 		IntegerObject * other = (IntegerObject *)other_tmp; 
-		
-		int length = self->length;
-		// int shortlength = other->length;
-
-		if(other->length > self->length){
-			length = other->length;
-			// shortlength self->length;
-		}
-
-		IntegerObject * new = IntegerObject_Init(length);
-		unsigned char selfdigit;
-		unsigned char otherdigit;
-		unsigned char carry = 0;
-		unsigned char tempval1;
-		unsigned char tempval2;
-		int oddeven = 0;
-		for (int i = 0; i < length; ++i)
-		{
-			selfdigit = 0;
-			if (i < self->length){
-				if (oddeven == 0){
-					selfdigit = self->value[(int)floor(i/2)] & 0x0F;
-				}else{
-					selfdigit = (self->value[(int)floor(i/2)] & 0xF0) >> 4;	
-				}
-			}
-			otherdigit = 0;
-			if (i < self->length){
-				if (oddeven == 0){
-					otherdigit = other->value[(int)floor(i/2)] & 0x0F;
-				}else{
-					otherdigit = (other->value[(int)floor(i/2)] & 0xF0) >> 4;
-				}
-			}
-
-			if(oddeven == 0){
-				tempval1 = selfdigit + otherdigit + carry;
-				carry = 0;
-				if (tempval1 > 9){
-					tempval1 = tempval1 - 10;
-					carry = 1;
-				}
-				oddeven = 1;
-			}else{
-				tempval2 = selfdigit + otherdigit + carry;
-				carry = 0;
-				if (tempval2 > 9){
-					tempval2 = tempval2 - 10;
-					carry = 1;
-				}
-
-				new->value[(int)floor(i/2)] = (unsigned char)(tempval1 + (tempval2<<4));
-				oddeven = 0;
-			}				
-		}
-		if(carry == 1){
-			IntegerObject_Resize((BaseObject *)new, new->length + 1);
-			new->value[new->length-1] = 1;
-		}
-		return (BaseObject *) new;
-
-	}else if(0){//float
+		IntegerObject * new = IntegerObject_Init(0);
+		new->value = self->value + other->value;		
+		return (BaseObject *)new;
+	}else if(OBJCHECKTYPE(other_tmp,"float")){//float
 		
 	}else{
 		//exception handler
 	}
-	// IntegerObject * o = (IntegerObject *)o_tmp;
 	return NULL;
 }
 
+HASH IntegerObject_Hash(BaseObject * self_tmp){
+	if(!OBJCHECKTYPE(self_tmp,"integer")){
+		//exception handler
+	}
+	IntegerObject * self = (IntegerObject *)self_tmp;
+	HASH hash = self->value * self->sign;
+	return hash;
+}
 
-BaseObject * IntegerObject_Fromlong(unsigned long value){
-	char buffer[10];
-	sprintf(buffer,"%li",value);
-	return IntegerObject_Fromstring(buffer);
+BaseObject * IntegerObject_UnaryNegate(BaseObject * self_tmp){
+	if(!OBJCHECKTYPE(self_tmp,"integer")){
+		//exception handler
+	}
+	IntegerObject * self = (IntegerObject *)self_tmp; 
+	IntegerObject * new = IntegerObject_Init(-(self->value));
+	return (BaseObject *)new;
+}
+
+
+
+BaseObject * IntegerObject_Fromlong(long value){
+	IntegerObject * o = IntegerObject_Init(0);
+	
+	if(value < 0){
+		value = -value;
+		o->sign = -1;
+	}
+
+	o->value = (IntegerObject_basedatatype)value;
+	return (BaseObject *)o;
 }
 
 long IntegerObject_Tolong(BaseObject * o_tmp){
+	IntegerObject * o = (IntegerObject *)o_tmp; 
+	return o->value*o->sign;
+}
 
-	char * repr = IntegerObject_Repr(o_tmp);
-	unsigned long res = (unsigned long)strtoul(repr, NULL, 10);
 
-	if(errno == ERANGE){
-		return 0;
+void IntegerObject_DESTRUCT(BaseObject * self_tmp){
+	IntegerObject * self = (IntegerObject *)self_tmp;
+	printf("integer <%p> deleting itself\n",self_tmp);
+	free(self);
+}
+
+
+NumberMethods IntegerObject_NumberMethods = {
+	//normal
+		//arithmetic
+		IntegerObject_BinaryAdd,	// add
+		0,	// sub
+		0,	// div
+		0,	// truediv
+		0,	// mod
+		0,	// mul
+		0,	// pow
+
+		//logic
+		0,	// and
+		0,	// or
+		0,	// xor
+		0,	// not
+		0,	// rshift
+		0,	// lshift
+
+		//other
+
+	//inplace
+		//arithmetic
+		0,	// iadd
+		0,	// isub
+		0,	// idiv
+		0,	// itruediv
+		0,	// imod
+		0,	// imul
+		0,	// ipow
+
+		//logic
+		0,	// iand
+		0,	// ior
+		0,	// ixor
+		0,	// inot
+		0,	// irshift
+		0,	// ilshift
+
+		//other
+
+	//unary
+	0,	// pos;
+	IntegerObject_UnaryNegate,	// neg;
+	0,	// inv;
+};
+
+
+TypeObject IntegerType = {
+	VarBaseObject_HEAD_INIT(&BaseObjectType,0)
+	"integer",										//typename
+	sizeof (IntegerObject),							//startsize
+	0,												//itemsize
+	&IntegerObject_DESTRUCT,						//destructor!
+	&IntegerObject_NumberMethods,					//numbermethods
+	&IntegerObject_Hash,							//hash
+};
+
+IntegerObject * IntegerObject_Init(IntegerObject_basedatatype value){
+	IntegerObject * a = malloc(sizeof(IntegerObject));
+	
+	if(value == 0){
+		*a = (IntegerObject) {
+			BaseObject_HEAD_INIT(&IntegerType)
+			0,
+			1
+		};
+		return a;
 	}
-	return res;
+	int sign = 1;
+	if(value < 0){
+		value = -value;
+		sign = -1;
+	}
+
+	*a = (IntegerObject) {
+		BaseObject_HEAD_INIT(&IntegerType)
+		(IntegerObject_basedatatype)value,
+		sign
+	};
+
+	return a;
 }

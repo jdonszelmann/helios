@@ -12,7 +12,7 @@ testfile = test.fox
 
 linker = gcc
 
-CFLAGS = -Wall -cpp
+CFLAGS = -Wall -cpp 
 CPPFLAGS = -Wall -c --std=c++11
 CFLAGS += $(foreach dir, $(includedirs), -I./$(dir))
 CPPFLAGS += $(foreach dir, $(includedirs), -I./$(dir))

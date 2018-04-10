@@ -6,18 +6,22 @@
 
 typedef struct{
 	Object_immutable_HEAD;
-	char * value;
-	int length;
+	IntegerObject_basedatatype value;
 	int sign;
 }IntegerObject;
 
 IntegerObject * IntegerObject_Init();
 char * IntegerObject_Repr(BaseObject * o_tmp);
 BaseObject * IntegerObject_Fromstring(char * value);
+void IntegerObject_DESTRUCT(BaseObject * self_tmp);
+
+
+BaseObject * IntegerObject_BinaryAdd(BaseObject * self,BaseObject * other);
+BaseObject * IntegerObject_UnaryNegate(BaseObject * self);
 
 TypeObject IntegerType;
 
-BaseObject * IntegerObject_Fromlong(unsigned long value);
-unsigned long intIntegerObject_Tolong(BaseObject * o);
+BaseObject * IntegerObject_Fromlong(long value);
+long IntegerObject_Tolong(BaseObject * o);
 
 #endif
