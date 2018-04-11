@@ -12,10 +12,11 @@ testfile = test.fox
 
 linker = gcc
 
-CFLAGS = -Wall -cpp 
+CFLAGS = -Wall -cpp -Os
 CPPFLAGS = -Wall -c --std=c++11
 CFLAGS += $(foreach dir, $(includedirs), -I./$(dir))
 CPPFLAGS += $(foreach dir, $(includedirs), -I./$(dir))
+LDFLAGS = 
 
 assembly_source_files := $(foreach dir,$(dirs),$(wildcard $(dir)/*.asm))
 assembly_object_files := $(patsubst src/arch/$(arch)%.asm, \
@@ -51,7 +52,7 @@ run: $(executable)
 
 $(executable): $(assembly_object_files) $(c_object_files) $(cpp_object_files)
 	@echo linking...
-	@$(linker) $(LDLAGS) -o $(executable) $(assembly_object_files) $(c_object_files) $(cpp_object_files)
+	@$(linker) $(LDFLAGS) -o $(executable) $(assembly_object_files) $(c_object_files) $(cpp_object_files)
 
 # compile assembly files
 build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm

@@ -6,6 +6,19 @@
 typedef int HASH;
 typedef HASH (*hashgenerator)(struct baseobj *);
 
+typedef enum {
+	EQ=0,
+	NEQ=1,
+	LT=2,
+	GT=3,
+	LTE=4,
+	GTE=5,
+} COMPARISON_OPERATOR;
+
+COMPARISON_OPERATOR REVERSE_COMPARISON_OPERATOR[6];
+
+
+
 #define Object_immutable_HEAD 	Refcount object_refcount; \
 								struct typeobj * object_type;
 
@@ -19,10 +32,10 @@ typedef HASH (*hashgenerator)(struct baseobj *);
 #define VarBaseObject_HEAD_INIT(type, size) \
 			BaseObject_HEAD_INIT(type) size,
 
-#define OBJREFCOUNT (o) 	((BaseObject 	*)	o)	->object_refcount
-#define OBJSIZE 	(o)		((VarBaseObject *)	o)	->object_size
-#define OBJTYPE 	(o) 	((BaseObject 	*)	o)	->object_type
-#define ITEMSIZE 	(o)		OBJTYPE(o)				->item_size
+#define OBJREFCOUNT(o) 	((BaseObject 	*)	o)	->object_refcount
+#define OBJSIZE(o)		((VarBaseObject *)	o)	->object_size
+#define OBJTYPE(o) 		((BaseObject 	*)	o)	->object_type
+#define ITEMSIZE(o)		OBJTYPE(o)				->item_size
 
 struct numbermethods;
 
@@ -85,7 +98,11 @@ TypeObject VarBaseObjectType;
 			o->object_refcount++;						\
 		}while(0)
 
-int OBJCHECKTYPE(BaseObject * o, char * type);
+// int OBJCHECKTYPE(BaseObject * o, char * type);
+#define OBJCHECKTYPE(o,type) strcmp(o->object_type->typename,type) == 0
 			
+BaseObject * BaseObject_Compare(BaseObject * a, BaseObject * b,COMPARISON_OPERATOR op);
+int BaseObject_Compare_BOOL(BaseObject * a, BaseObject * b,COMPARISON_OPERATOR op);
+
 
 #endif

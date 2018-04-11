@@ -9,6 +9,7 @@
 #include <Object.h>
 #include <Integer.h>
 #include <Dictionary.h>
+#include <Boolean.h>
 
 #include <Memory.h>
 

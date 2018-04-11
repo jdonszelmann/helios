@@ -39,7 +39,7 @@ char * IntegerObject_Repr(BaseObject * o_tmp){
 	#ifdef ENV64BIT
 	sprintf(buffer,"%lld", (long long)(o->value));
 	#endif
-	
+		
 	#ifdef ENV32BIT
 	sprintf(buffer,"%ld", (long)(o->value));
 	#endif
@@ -68,6 +68,29 @@ BaseObject * IntegerObject_BinaryAdd(BaseObject * self_tmp,BaseObject * other_tm
 	return NULL;
 }
 
+
+BaseObject * IntegerObject_BinaryEQ(BaseObject * self_tmp,BaseObject * other_tmp){
+	if(!OBJCHECKTYPE(self_tmp,"integer")){
+		//exception handler
+	}
+	IntegerObject * self = (IntegerObject *)self_tmp; 
+	if(OBJCHECKTYPE(other_tmp,"integer")){
+		IntegerObject * other = (IntegerObject *)other_tmp; 
+		if(self->value == other->value){
+			return True;
+		}else{
+			return False;
+		}
+	}else if(OBJCHECKTYPE(other_tmp,"float")){//float
+		
+	}else{
+		//exception handler
+	}
+	return NULL;
+}
+
+
+
 HASH IntegerObject_Hash(BaseObject * self_tmp){
 	if(!OBJCHECKTYPE(self_tmp,"integer")){
 		//exception handler
@@ -86,6 +109,17 @@ BaseObject * IntegerObject_UnaryNegate(BaseObject * self_tmp){
 	return (BaseObject *)new;
 }
 
+
+BaseObject * IntegerObject_UnaryBool(BaseObject * self_tmp){
+	if(!OBJCHECKTYPE(self_tmp,"integer")){
+		//exception handler
+	}
+	IntegerObject * self = (IntegerObject *)self_tmp;
+	if(self->value == 0){
+		return False;
+	}
+	return True;
+}
 
 
 BaseObject * IntegerObject_Fromlong(long value){
@@ -153,6 +187,14 @@ NumberMethods IntegerObject_NumberMethods = {
 		0,	// ilshift
 
 		//other
+	//cmp
+	IntegerObject_BinaryEQ,	// EQ
+	0,	// NEQ
+	0,	// LT
+	0,	// GT
+	0,	// LTE
+	0,	// GTE
+	IntegerObject_UnaryBool,	// ASBOOL
 
 	//unary
 	0,	// pos;

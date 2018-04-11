@@ -2,6 +2,7 @@
 #define NUMBERS_H
 #include <Foxlang.h>
 
+
 typedef int (*inquiry)(struct baseobj *, struct baseobj *, struct baseobj *);
 typedef struct baseobj * (*TernaryOperator)(struct baseobj *, struct baseobj *, struct baseobj *);
 typedef struct baseobj * (*BinaryOperator)(struct baseobj *, struct baseobj *);
@@ -48,6 +49,15 @@ typedef struct numbermethods{
 		BinaryOperator ilshift;
 
 		//other
+	
+	//cmp
+	BinaryOperator EQ;
+	BinaryOperator NEQ;
+	BinaryOperator LT;
+	BinaryOperator GT;
+	BinaryOperator LTE;
+	BinaryOperator GTE;
+	UnaryOperator ASBOOL;
 
 	//unary
 	UnaryOperator pos;

@@ -10,6 +10,7 @@ typedef struct{
 	BaseObject * key;
 	BaseObject * value;
 	HASH keyhash;
+	char filled;
 }DictionaryObjectPair;
 
 typedef struct{
@@ -20,6 +21,9 @@ typedef struct{
 DictionaryObject * DictionaryObject_Init();
 void DictionaryObject_DESTRUCT(BaseObject * self_tmp);
 void DictionaryObject_RESIZE(BaseObject * self_tmp,unsigned int size);
+
+
+void DictionaryObject_Insert(BaseObject * self_tmp, BaseObject * key, BaseObject * value);
 
 TypeObject DictionaryType;
 
