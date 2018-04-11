@@ -22,7 +22,13 @@ TypeObject VarBaseObjectType = {
 };
 
 BaseObject * BaseObject_Compare(BaseObject * a, BaseObject * b,COMPARISON_OPERATOR op){
-	return NULL;
+	if(a == NULL || b == NULL){
+		//exception handler
+		return NULL
+	}
+	// if(op == EQ)
+
+
 }
 
 
@@ -36,7 +42,9 @@ int BaseObject_Compare_BOOL(BaseObject * a, BaseObject * b,COMPARISON_OPERATOR o
 		}
 	}else{
 		BaseObject * res = BaseObject_Compare(a,b,op);
-		if(IS_BOOLEAN(res)){
+		if (res == NULL){
+			compared_result = -1;
+		}else if(IS_BOOLEAN(res)){
 			compared_result = BOOLEAN_IS_TRUE(res);
 		}else{
 			compared_result = BASEOBJECT_IS_TRUE(res);
