@@ -9,16 +9,34 @@
 
 #include <Foxlang.h>
 
+char * DictionaryObject_Repr_CHARPNT(BaseObject * self_tmp){
+	DictionaryObject * self = (DictionaryObject *)self_tmp;
+	for (int i = 0; i < OBJSIZE(self); ++i)
+	{
+		
+	}
+	return "";
+}
+
 
 void DictionaryObject_Insert(BaseObject * self_tmp, BaseObject * key, BaseObject * value){
 	DictionaryObject * self = (DictionaryObject *)self_tmp;
 	HASH hash;
 	TypeObject * t = OBJTYPE(key);
 	if(t->generate_hash == 0){
+		return;
 		//exception handler 
 	}else{
 		hash = t->generate_hash(key);
-
+		for(int i=0;i<OBJSIZE(self);i++){
+			if(self->values[i].keyhash == hash){
+				if(BOOLEAN_IS_TRUE(BaseObject_Compare(self->values[i].value,value,EQ))){
+					self->values[i].value = value;
+					printf("object at %i replaced\n",i);
+					return;
+				}
+			}
+		}
 		if(!self->values[hash%OBJSIZE(self)].filled){
 			self->values[hash%OBJSIZE(self)] = (DictionaryObjectPair){
 				key,
@@ -26,11 +44,29 @@ void DictionaryObject_Insert(BaseObject * self_tmp, BaseObject * key, BaseObject
 				hash,
 				true,
 			};
-			printf("succesfully isnserted at %i\n",hash%OBJSIZE(self));
-		}else if(false){
-			//OBJCMP_VAL(self->values[hash%OBJSIZE(self)].key,key)
+			printf("succesfully inserted at %i\n",hash%OBJSIZE(self));
+		}else if(BOOLEAN_IS_TRUE(BaseObject_Compare(self->values[hash%OBJSIZE(self)].value,value,EQ))){
+			self->values[hash%OBJSIZE(self)].value = value;
 		}else{
-			printf("not null\n");
+			int counter = 0;
+			while(++counter){
+				if(!self->values[(hash+counter)%OBJSIZE(self)].filled){
+					self->values[(hash+counter)%OBJSIZE(self)] = (DictionaryObjectPair){
+						key,
+						value,
+						hash,
+						true,
+					};
+					printf("succesfully inserted at %i (added %i to index)\n",(hash+counter)%OBJSIZE(self),counter);
+					break;
+				}
+				printf("%i,%i\n",counter,OBJSIZE(self));
+				if(counter > OBJSIZE(self)){
+					printf("DICTIONARY FULL");
+					//error handler
+					return;
+				}
+			}
 		}
 	}
 }
@@ -54,6 +90,7 @@ TypeObject DictionaryType = {
 	sizeof (DictionaryObject),						//startsize
 	0,												//itemsize
 	&DictionaryObject_DESTRUCT,						//destructor!
+	0,												//comparemethods
 	0,												//numbermethods
 	0,												//hash
 };

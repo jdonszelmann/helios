@@ -10,6 +10,7 @@
 #include <Integer.h>
 #include <Dictionary.h>
 #include <Boolean.h>
+#include <String.h>
 
 #include <Memory.h>
 

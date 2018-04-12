@@ -51,6 +51,7 @@ typedef struct typeobj{
 	// setattrfunc setattribute;
 
 	//comparemethods
+	struct comparemethods * compare;
 	struct numbermethods * number; //numbermethods
 	//sequencemethods (iterator)
 	//methods
@@ -101,6 +102,13 @@ TypeObject VarBaseObjectType;
 // int OBJCHECKTYPE(BaseObject * o, char * type);
 #define OBJCHECKTYPE(o,type) strcmp(o->object_type->typename,type) == 0
 			
+BaseObject * BaseObject_Compare_NEQ(BaseObject * a, BaseObject * b);
+BaseObject * BaseObject_Compare_EQ(BaseObject * a, BaseObject * b);
+BaseObject * BaseObject_Compare_LT(BaseObject * a, BaseObject * b);
+BaseObject * BaseObject_Compare_LTE(BaseObject * a, BaseObject * b);
+BaseObject * BaseObject_Compare_GT(BaseObject * a, BaseObject * b);
+BaseObject * BaseObject_Compare_GTE(BaseObject * a, BaseObject * b);
+
 BaseObject * BaseObject_Compare(BaseObject * a, BaseObject * b,COMPARISON_OPERATOR op);
 int BaseObject_Compare_BOOL(BaseObject * a, BaseObject * b,COMPARISON_OPERATOR op);
 

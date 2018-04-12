@@ -11,10 +11,10 @@ typedef struct{
 }IntegerObject;
 
 IntegerObject * IntegerObject_Init();
-char * IntegerObject_Repr(BaseObject * o_tmp);
+char * IntegerObject_Repr_CHARPNT(BaseObject * o_tmp);
 BaseObject * IntegerObject_Fromstring(char * value);
 void IntegerObject_DESTRUCT(BaseObject * self_tmp);
-
+HASH IntegerObject_Hash(BaseObject * self_tmp);
 
 BaseObject * IntegerObject_BinaryAdd(BaseObject * self,BaseObject * other);
 BaseObject * IntegerObject_BinaryEQ(BaseObject * self_tmp,BaseObject * other_tmp);

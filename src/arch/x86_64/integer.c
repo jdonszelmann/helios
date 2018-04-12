@@ -11,7 +11,7 @@
 
 
 BaseObject * IntegerObject_Fromstring(char * value){
-	IntegerObject * a = IntegerObject_Init(0);
+	IntegerObject * a = IntegerObject_Init();
 
 	#ifdef ENV64BIT
 	a->value = strtoull(value, NULL, 10);
@@ -26,7 +26,7 @@ BaseObject * IntegerObject_Fromstring(char * value){
 	return (BaseObject *)a;
 }
 
-char * IntegerObject_Repr(BaseObject * o_tmp){
+char * IntegerObject_Repr_CHARPNT(BaseObject * o_tmp){
 	IntegerObject * o = (IntegerObject *)o_tmp;
 	char * buffer = malloc(24 * sizeof(char));
 	if(o->sign == -1){
@@ -57,7 +57,7 @@ BaseObject * IntegerObject_BinaryAdd(BaseObject * self_tmp,BaseObject * other_tm
 	IntegerObject * self = (IntegerObject *)self_tmp; 
 	if(OBJCHECKTYPE(other_tmp,"integer")){
 		IntegerObject * other = (IntegerObject *)other_tmp; 
-		IntegerObject * new = IntegerObject_Init(0);
+		IntegerObject * new = IntegerObject_Init();
 		new->value = self->value + other->value;		
 		return (BaseObject *)new;
 	}else if(OBJCHECKTYPE(other_tmp,"float")){//float
@@ -105,7 +105,9 @@ BaseObject * IntegerObject_UnaryNegate(BaseObject * self_tmp){
 		//exception handler
 	}
 	IntegerObject * self = (IntegerObject *)self_tmp; 
-	IntegerObject * new = IntegerObject_Init(-(self->value));
+	IntegerObject * new = IntegerObject_Init();
+	new->value = self->value;
+	new->sign = -self->sign;
 	return (BaseObject *)new;
 }
 
@@ -123,7 +125,7 @@ BaseObject * IntegerObject_UnaryBool(BaseObject * self_tmp){
 
 
 BaseObject * IntegerObject_Fromlong(long value){
-	IntegerObject * o = IntegerObject_Init(0);
+	IntegerObject * o = IntegerObject_Init();
 	
 	if(value < 0){
 		value = -value;
@@ -187,7 +189,14 @@ NumberMethods IntegerObject_NumberMethods = {
 		0,	// ilshift
 
 		//other
-	//cmp
+
+	//unary
+	0,	// pos;
+	IntegerObject_UnaryNegate,	// neg;
+	0,	// inv;
+};
+
+CompareMethods IntegerObject_Compare = {
 	IntegerObject_BinaryEQ,	// EQ
 	0,	// NEQ
 	0,	// LT
@@ -195,11 +204,6 @@ NumberMethods IntegerObject_NumberMethods = {
 	0,	// LTE
 	0,	// GTE
 	IntegerObject_UnaryBool,	// ASBOOL
-
-	//unary
-	0,	// pos;
-	IntegerObject_UnaryNegate,	// neg;
-	0,	// inv;
 };
 
 
@@ -209,32 +213,18 @@ TypeObject IntegerType = {
 	sizeof (IntegerObject),							//startsize
 	0,												//itemsize
 	&IntegerObject_DESTRUCT,						//destructor!
+	&IntegerObject_Compare,							//comparemethods
 	&IntegerObject_NumberMethods,					//numbermethods
 	&IntegerObject_Hash,							//hash
 };
 
-IntegerObject * IntegerObject_Init(IntegerObject_basedatatype value){
+IntegerObject * IntegerObject_Init(){
 	IntegerObject * a = malloc(sizeof(IntegerObject));
 	
-	if(value == 0){
-		*a = (IntegerObject) {
-			BaseObject_HEAD_INIT(&IntegerType)
-			0,
-			1
-		};
-		return a;
-	}
-	int sign = 1;
-	if(value < 0){
-		value = -value;
-		sign = -1;
-	}
-
 	*a = (IntegerObject) {
 		BaseObject_HEAD_INIT(&IntegerType)
-		(IntegerObject_basedatatype)value,
-		sign
+		0,
+		1
 	};
-
 	return a;
 }

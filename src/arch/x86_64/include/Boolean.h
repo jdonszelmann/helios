@@ -19,7 +19,8 @@ BaseObject * False;
 #define BOOLEAN_IS_TRUE(o) ((BaseObject *)o == True)
 #define BOOLEAN_NOT_TRUE(o) !BOOLEAN_IS_TRUE(o)
 #define BOOLEAN_IS_FALSE(o) ((BaseObject *)o == False)
-#define BOOLEAN_not_FALSE(o) !BOOLEAN_IS_FALSE(o)
+#define BOOLEAN_NOT_FALSE(o) !BOOLEAN_IS_FALSE(o)
+#define BOOLEAN_NOT(o) (o == True)?False:True
 #define IS_BOOLEAN(o) (o == True || o == False)
 
 inline int BASEOBJECT_IS_TRUE(BaseObject * o){
@@ -29,11 +30,11 @@ inline int BASEOBJECT_IS_TRUE(BaseObject * o){
 		return 0;
 	// }else if (IS_NONE(o)){
 	// 	return 0;
-	}else if(OBJTYPE(o)->number != NULL && OBJTYPE(o)->number->ASBOOL != NULL){
+	}else if(OBJTYPE(o)->compare != NULL && OBJTYPE(o)->compare->ASBOOL != NULL){
 		int counter = 0;
 		BaseObject * current = o;
 		while(1){
-			BaseObject * a = OBJTYPE(current)->number->ASBOOL(current);
+			BaseObject * a = OBJTYPE(current)->compare->ASBOOL(current);
 			if(IS_BOOLEAN(a)){
 				return BOOLEAN_IS_TRUE(a);
 			}else if(counter > 1000){

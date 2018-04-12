@@ -8,6 +8,16 @@ typedef struct baseobj * (*TernaryOperator)(struct baseobj *, struct baseobj *, 
 typedef struct baseobj * (*BinaryOperator)(struct baseobj *, struct baseobj *);
 typedef struct baseobj * (*UnaryOperator)(struct baseobj *);
 
+typedef struct comparemethods{
+	BinaryOperator EQ;
+	BinaryOperator NEQ;
+	BinaryOperator LT;
+	BinaryOperator GT;
+	BinaryOperator LTE;
+	BinaryOperator GTE;
+	UnaryOperator ASBOOL;
+}CompareMethods;
+
 
 typedef struct numbermethods{
 	//normal
@@ -49,16 +59,6 @@ typedef struct numbermethods{
 		BinaryOperator ilshift;
 
 		//other
-	
-	//cmp
-	BinaryOperator EQ;
-	BinaryOperator NEQ;
-	BinaryOperator LT;
-	BinaryOperator GT;
-	BinaryOperator LTE;
-	BinaryOperator GTE;
-	UnaryOperator ASBOOL;
-
 	//unary
 	UnaryOperator pos;
 	UnaryOperator neg;

@@ -17,6 +17,7 @@ TypeObject BooleanType = {
 	sizeof (BooleanObject),							//startsize
 	0,												//itemsize
 	&IntegerObject_DESTRUCT,						//destructor!	!CURRENTLY IMPLEMENTED AS INTEGER!
+	0,												//comparemethods
 	&IntegerObject_NumberMethods,					//numbermethods !CURRENTLY IMPLEMENTED AS INTEGER!
 	0,												//hash
 };
