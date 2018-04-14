@@ -10,6 +10,9 @@ typedef struct{
 BaseObject * BooleanObject_FromBool(int value);
 int BooleanObject_ToBool(BaseObject * o);
 
+BaseObject * BooleanObject_Repr(BaseObject * o_tmp);
+char * BooleanObject_CHARPNT(BaseObject * o_tmp);
+
 TypeObject BooleanType;
 
 

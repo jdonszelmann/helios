@@ -6,22 +6,88 @@
 #include <errno.h>
 #include <math.h>
 #include <assert.h>
+#include <stdarg.h>
+#include <stdbool.h>
 
 #include <Foxlang.h>
 
 
+void StringObject_Setvalue(StringObject * self, char * value){
+	self->value = value;
+}
+
 BaseObject * StringObject_Fromstring(char * value){
 	StringObject * a = StringObject_Init();
-	OBJTYPE(a)->item_size = strlen(value);
-	a->value = value;
+	StringObject_Setvalue(a,value);
 	return (BaseObject *)a;
 }
 
-char * StringObject_Repr_CHARPNT(BaseObject * o_tmp){
-	StringObject * o = (StringObject *)o_tmp;
-	return o->value;
+BaseObject * StringObject_Fromformat(char * format,...){
+    va_list args,copy;
+    va_start(args, format);
+
+	va_copy(copy, args);
+    int bufsz = vsnprintf(NULL, 0, format,copy);
+    va_end(copy);
+
+    char * res = malloc(bufsz+1);
+    vsnprintf(res,bufsz+1,format,args);
+    va_end(args);
+    return StringObject_Fromstring(res);
 }
 
+char * StringObject_Repr_CHARPNT(BaseObject * self_tmp){
+	StringObject * self = (StringObject *)self_tmp;
+
+	int copysize = OBJTYPE(self)->item_size + 10;
+	char * copy = malloc(copysize * sizeof(char));
+	*copy = '\'';
+	int copycounter = 1;
+	int originalcounter = 0;	
+	while(1){
+		if(self->value[originalcounter] == '\0'){
+			copy[copycounter] = '\'';
+			copycounter++;
+			copy[copycounter] = '\0';
+			copycounter++;
+			break;
+		}
+		if(self->value[originalcounter] == '\n'){
+			copy[copycounter] = '\\';
+			copycounter++;
+			copy[copycounter] = 'n';
+			copycounter++;
+		}else{
+			copy[copycounter] = self->value[originalcounter];
+			copycounter++;
+		}
+		if(copycounter > copysize-2){
+			copysize += 20;
+			copy = realloc(copy,copysize);
+		}
+		originalcounter++;
+	}
+	return copy;
+}
+
+BaseObject * StringObject_Repr(BaseObject * self_tmp){
+	StringObject * res = StringObject_Init();
+	StringObject_Setvalue(res,StringObject_Repr_CHARPNT(self_tmp));
+	return (BaseObject *)res;
+}
+
+char * StringObject_Str_CHARPNT(BaseObject * self_tmp){
+	StringObject * self = (StringObject *)self_tmp;
+	char * res = malloc(sizeof(char)*OBJTYPE(self)->item_size+1);
+	strcpy(res,self->value);
+	return res;
+}
+
+BaseObject * StringObject_Str(BaseObject * self_tmp){
+	StringObject * res = StringObject_Init();
+	StringObject_Setvalue(res,StringObject_Str_CHARPNT(self_tmp));
+	return (BaseObject *)res;
+}
 
 BaseObject * StringObject_BinaryEQ(BaseObject * self_tmp,BaseObject * other_tmp){
 	if(!OBJCHECKTYPE(self_tmp,"string")){
@@ -47,7 +113,15 @@ HASH StringObject_Hash(BaseObject * self_tmp){
 		//exception handler
 	}
 	StringObject * self = (StringObject *)self_tmp;
-	HASH hash = 0;//NOT IMPLEMENTED
+	if(self->statichash != -1){
+		return self->statichash;
+	}
+	
+	HASH hash = *self->value << 7;
+	for(int i = 0; i < OBJTYPE(self)->item_size; ++i){
+		hash = (hash * 1000003) ^ self->value[i];
+	}
+	self->statichash = hash;
 	return hash;
 }
 
@@ -91,6 +165,7 @@ TypeObject StringType = {
 	&StringObject_Compare,							//comparemethods
 	0,												//numbermethods
 	&StringObject_Hash,								//hash
+	&StringObject_Repr,								//repr
 };
 
 StringObject * StringObject_Init(){
@@ -98,7 +173,9 @@ StringObject * StringObject_Init(){
 	
 	*a = (StringObject) {
 		BaseObject_HEAD_INIT(&StringType)
-		""
+		NULL,
+		-1
 	};
+	StringObject_Setvalue(a,"");
 	return a;
 }

@@ -39,6 +39,10 @@ install:
 	sudo apt-get install nasm
 
 
+debug: $(executable)
+	gdb $(executable)
+
+
 clean:
 	@rm -r build
 

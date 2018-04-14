@@ -1,3 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+#include <errno.h>
+#include <math.h>
+#include <assert.h>
 
 #include <Foxlang.h>
 
@@ -12,6 +19,7 @@ TypeObject BaseObjectType = {
 	0,											//comparemethods
 	0,											//numbermethods
 	0,											//hash
+	0,											//repr
 };
 
 TypeObject VarBaseObjectType = {
@@ -23,7 +31,24 @@ TypeObject VarBaseObjectType = {
 	0,											//comparemethods
 	0,											//numbermethods
 	0,											//hash
+	0,											//repr
 };
+
+char * BaseObject_Repr_CHARPNT(BaseObject * self){
+	return StringObject_Str_CHARPNT(BaseObject_Repr(self));
+}
+
+BaseObject * BaseObject_Repr(BaseObject * self){
+	if(self == NULL){
+		return NULL;
+	}
+	if(OBJTYPE(self)->reprfunction == NULL){
+		return StringObject_Fromformat("<%s object at %p>",OBJTYPE(self)->typename,self);
+	}
+	BaseObject * res = OBJTYPE(self)->reprfunction(self);
+	return res;
+}
+
 
 BaseObject * BaseObject_Compare_NEQ(BaseObject * a, BaseObject * b){
 		if(OBJTYPE(a)->compare != NULL && OBJTYPE(a)->compare->NEQ != NULL){
@@ -107,4 +132,19 @@ int BaseObject_Compare_BOOL(BaseObject * a, BaseObject * b,COMPARISON_OPERATOR o
 		DECREF(res);
 	}
 	return compared_result;
+}
+
+
+HASH BaseObject_Hash_HASH(BaseObject * self){
+	if(OBJTYPE(self)->generate_hash == NULL){
+		//exception handler
+		printf("object not hashable");
+		return -1;
+	}else{
+		return OBJTYPE(self)->generate_hash(self);
+	}
+}
+
+BaseObject * BaseObject_Hash(BaseObject * self){
+	return (BaseObject *)IntegerObject_Fromlong(BaseObject_Hash_HASH(self));
 }

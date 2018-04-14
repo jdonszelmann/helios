@@ -10,6 +10,17 @@
 
 #include <Foxlang.h>
 
+BaseObject * BooleanObject_Repr(BaseObject * o_tmp){
+	return (BaseObject *)StringObject_Fromstring(BooleanObject_CHARPNT(o_tmp));
+}
+
+char * BooleanObject_CHARPNT(BaseObject * o_tmp){
+	if(o_tmp == True){
+		return "True";
+	}else{
+		return "False";
+	}
+}
 
 TypeObject BooleanType = {
 	VarBaseObject_HEAD_INIT(&BaseObjectType,0)
@@ -20,6 +31,7 @@ TypeObject BooleanType = {
 	0,												//comparemethods
 	&IntegerObject_NumberMethods,					//numbermethods !CURRENTLY IMPLEMENTED AS INTEGER!
 	0,												//hash
+	&BooleanObject_Repr,							//repr
 };
 
 
@@ -34,6 +46,6 @@ BaseObject * BooleanObject_FromBool(int value){
 }
 
 int BooleanObject_ToBool(BaseObject * o_tmp){
-	BooleanObject * o = (BooleanObject *)o;
+	BooleanObject * o = (BooleanObject *)o_tmp;
 	return BOOLEAN_IS_TRUE(o);
 }

@@ -50,6 +50,10 @@ char * IntegerObject_Repr_CHARPNT(BaseObject * o_tmp){
 	return buffer;
 }
 
+BaseObject * IntegerObject_Repr(BaseObject * o_tmp){
+	return (BaseObject *) StringObject_Fromstring(IntegerObject_Repr_CHARPNT(o_tmp));
+}
+
 BaseObject * IntegerObject_BinaryAdd(BaseObject * self_tmp,BaseObject * other_tmp){
 	if(!OBJCHECKTYPE(self_tmp,"integer")){
 		//exception handler
@@ -216,6 +220,7 @@ TypeObject IntegerType = {
 	&IntegerObject_Compare,							//comparemethods
 	&IntegerObject_NumberMethods,					//numbermethods
 	&IntegerObject_Hash,							//hash
+	&IntegerObject_Repr,							//repr
 };
 
 IntegerObject * IntegerObject_Init(){

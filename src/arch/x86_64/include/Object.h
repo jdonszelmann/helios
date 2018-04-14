@@ -35,7 +35,7 @@ COMPARISON_OPERATOR REVERSE_COMPARISON_OPERATOR[6];
 #define OBJREFCOUNT(o) 	((BaseObject 	*)	o)	->object_refcount
 #define OBJSIZE(o)		((VarBaseObject *)	o)	->object_size
 #define OBJTYPE(o) 		((BaseObject 	*)	o)	->object_type
-#define ITEMSIZE(o)		OBJTYPE(o)				->item_size
+#define ITEMSIZE(o)		(OBJTYPE(o)				->item_size)
 
 struct numbermethods;
 
@@ -58,7 +58,7 @@ typedef struct typeobj{
 	hashgenerator generate_hash; //hash
 	//call(able)
 	//str
-	//repr
+	UnaryOperator reprfunction; //repr
 	//docstring?
 
 	//dict
@@ -112,5 +112,10 @@ BaseObject * BaseObject_Compare_GTE(BaseObject * a, BaseObject * b);
 BaseObject * BaseObject_Compare(BaseObject * a, BaseObject * b,COMPARISON_OPERATOR op);
 int BaseObject_Compare_BOOL(BaseObject * a, BaseObject * b,COMPARISON_OPERATOR op);
 
+char * BaseObject_Repr_CHARPNT(BaseObject * self);
+BaseObject * BaseObject_Repr(BaseObject * self);
+
+HASH BaseObject_Hash_HASH(BaseObject * self);
+BaseObject * BaseObject_Hash(BaseObject * self);
 
 #endif
