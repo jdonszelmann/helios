@@ -13,7 +13,16 @@
 
 
 void StringObject_Setvalue(StringObject * self, char * value){
-	self->value = value;
+	if(self->value!=NULL){
+		free(self->value);
+	}
+	int length = strlen(value);
+	char * p = malloc((length+1)*sizeof(char));
+	if(p==NULL){
+		printf("NULL");
+	}
+	self->value = p;
+	strcpy(self->value,value);
 }
 
 BaseObject * StringObject_Fromstring(char * value){
@@ -33,17 +42,27 @@ BaseObject * StringObject_Fromformat(char * format,...){
     char * res = malloc(bufsz+1);
     vsnprintf(res,bufsz+1,format,args);
     va_end(args);
-    return StringObject_Fromstring(res);
+
+    BaseObject * str = StringObject_Fromstring(res);
+    free(res);
+    return str;
 }
 
 char * StringObject_Repr_CHARPNT(BaseObject * self_tmp){
 	StringObject * self = (StringObject *)self_tmp;
-
+	if(self->value == NULL){
+		char * ret = malloc(3*sizeof(char));
+		*ret = '"';
+		*(ret+1) = '"';
+		*(ret+2) = '\0';
+		return ret;
+	}
 	int copysize = OBJTYPE(self)->item_size + 10;
 	char * copy = malloc(copysize * sizeof(char));
 	*copy = '\'';
 	int copycounter = 1;
 	int originalcounter = 0;	
+
 	while(1){
 		if(self->value[originalcounter] == '\0'){
 			copy[copycounter] = '\'';
@@ -72,7 +91,9 @@ char * StringObject_Repr_CHARPNT(BaseObject * self_tmp){
 
 BaseObject * StringObject_Repr(BaseObject * self_tmp){
 	StringObject * res = StringObject_Init();
-	StringObject_Setvalue(res,StringObject_Repr_CHARPNT(self_tmp));
+	char * str = StringObject_Repr_CHARPNT(self_tmp);
+	StringObject_Setvalue(res,str);
+	free(str);
 	return (BaseObject *)res;
 }
 
@@ -85,14 +106,13 @@ char * StringObject_Str_CHARPNT(BaseObject * self_tmp){
 
 BaseObject * StringObject_Str(BaseObject * self_tmp){
 	StringObject * res = StringObject_Init();
-	StringObject_Setvalue(res,StringObject_Str_CHARPNT(self_tmp));
+	char * str = StringObject_Str_CHARPNT(self_tmp);
+	StringObject_Setvalue(res,str);
+	free(str);
 	return (BaseObject *)res;
 }
 
 BaseObject * StringObject_BinaryEQ(BaseObject * self_tmp,BaseObject * other_tmp){
-	if(!OBJCHECKTYPE(self_tmp,"string")){
-		//exception handler
-	}
 	StringObject * self = (StringObject *)self_tmp; 
 	if(OBJCHECKTYPE(other_tmp,"string")){
 		StringObject * other = (StringObject *)other_tmp; 
@@ -110,7 +130,7 @@ BaseObject * StringObject_BinaryEQ(BaseObject * self_tmp,BaseObject * other_tmp)
 
 HASH StringObject_Hash(BaseObject * self_tmp){
 	if(!OBJCHECKTYPE(self_tmp,"string")){
-		//exception handler
+		RAISE(ExceptionObject_FromCHARPNT("TypeError. wrong function."));
 	}
 	StringObject * self = (StringObject *)self_tmp;
 	if(self->statichash != -1){
@@ -127,7 +147,7 @@ HASH StringObject_Hash(BaseObject * self_tmp){
 
 BaseObject * StringObject_UnaryBool(BaseObject * self_tmp){
 	if(!OBJCHECKTYPE(self_tmp,"string")){
-		//exception handler
+		RAISE(ExceptionObject_FromCHARPNT("TypeError. wrong function."));
 	}
 	StringObject * self = (StringObject *)self_tmp;
 	if(strlen(self->value) == 0){
@@ -138,9 +158,14 @@ BaseObject * StringObject_UnaryBool(BaseObject * self_tmp){
 
 
 void StringObject_DESTRUCT(BaseObject * self_tmp){
+	if(self_tmp == NULL){
+		return;
+	}
 	StringObject * self = (StringObject *)self_tmp;
-	printf("string <%p> deleting itself\n",self_tmp);
-	free(self->value);
+	// printf("string <%p> deleting itself\n",self_tmp);
+	if(self->value != NULL){
+		free(self->value);
+	}
 	free(self);
 }
 
@@ -176,6 +201,6 @@ StringObject * StringObject_Init(){
 		NULL,
 		-1
 	};
-	StringObject_Setvalue(a,"");
+	Fox_Initialize_Object((BaseObject *)a);
 	return a;
 }

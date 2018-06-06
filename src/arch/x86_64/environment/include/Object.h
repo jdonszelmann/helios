@@ -26,7 +26,7 @@ COMPARISON_OPERATOR REVERSE_COMPARISON_OPERATOR[6];
 								ObjectSize object_size;
 
 #define BaseObject_HEAD_INIT(type)        \
-			1, type,
+			1,type,
 
 
 #define VarBaseObject_HEAD_INIT(type, size) \
@@ -114,6 +114,8 @@ int BaseObject_Compare_BOOL(BaseObject * a, BaseObject * b,COMPARISON_OPERATOR o
 
 char * BaseObject_Repr_CHARPNT(BaseObject * self);
 BaseObject * BaseObject_Repr(BaseObject * self);
+
+void BaseObject_PRINTFUNC(BaseObject * self);
 
 HASH BaseObject_Hash_HASH(BaseObject * self);
 BaseObject * BaseObject_Hash(BaseObject * self);

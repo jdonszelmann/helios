@@ -21,7 +21,7 @@ BaseObject * IntegerObject_Fromstring(char * value){
 	#endif
 
 	if(errno == ERANGE){
-		//exception handler
+		RAISE(ExceptionObject_FromCHARPNT("TypeError. integer out of range (use longs or wait till i implemented autoconversion............)"));
 	}
 	return (BaseObject *)a;
 }
@@ -51,13 +51,13 @@ char * IntegerObject_Repr_CHARPNT(BaseObject * o_tmp){
 }
 
 BaseObject * IntegerObject_Repr(BaseObject * o_tmp){
-	return (BaseObject *) StringObject_Fromstring(IntegerObject_Repr_CHARPNT(o_tmp));
+	char * res = IntegerObject_Repr_CHARPNT(o_tmp);
+	BaseObject * str = StringObject_Fromstring(res);
+	free(res);
+	return str;
 }
 
 BaseObject * IntegerObject_BinaryAdd(BaseObject * self_tmp,BaseObject * other_tmp){
-	if(!OBJCHECKTYPE(self_tmp,"integer")){
-		//exception handler
-	}
 	IntegerObject * self = (IntegerObject *)self_tmp; 
 	if(OBJCHECKTYPE(other_tmp,"integer")){
 		IntegerObject * other = (IntegerObject *)other_tmp; 
@@ -65,18 +65,15 @@ BaseObject * IntegerObject_BinaryAdd(BaseObject * self_tmp,BaseObject * other_tm
 		new->value = self->value + other->value;		
 		return (BaseObject *)new;
 	}else if(OBJCHECKTYPE(other_tmp,"float")){//float
-		
+		RAISE(ExceptionObject_FromCHARPNT("TypeError. int-float addition not supported (yet)"));
 	}else{
-		//exception handler
+		RAISE(ExceptionObject_FromCHARPNT("TypeError. invalid type for addition"));
 	}
 	return NULL;
 }
 
 
 BaseObject * IntegerObject_BinaryEQ(BaseObject * self_tmp,BaseObject * other_tmp){
-	if(!OBJCHECKTYPE(self_tmp,"integer")){
-		//exception handler
-	}
 	IntegerObject * self = (IntegerObject *)self_tmp; 
 	if(OBJCHECKTYPE(other_tmp,"integer")){
 		IntegerObject * other = (IntegerObject *)other_tmp; 
@@ -86,9 +83,9 @@ BaseObject * IntegerObject_BinaryEQ(BaseObject * self_tmp,BaseObject * other_tmp
 			return False;
 		}
 	}else if(OBJCHECKTYPE(other_tmp,"float")){//float
-		
+		RAISE(ExceptionObject_FromCHARPNT("TypeError. int-float comparison not supported (yet)"));	
 	}else{
-		//exception handler
+		return False;
 	}
 	return NULL;
 }
@@ -97,7 +94,7 @@ BaseObject * IntegerObject_BinaryEQ(BaseObject * self_tmp,BaseObject * other_tmp
 
 HASH IntegerObject_Hash(BaseObject * self_tmp){
 	if(!OBJCHECKTYPE(self_tmp,"integer")){
-		//exception handler
+		RAISE(ExceptionObject_FromCHARPNT("TypeError. wrong function."));
 	}
 	IntegerObject * self = (IntegerObject *)self_tmp;
 	HASH hash = self->value * self->sign;
@@ -106,7 +103,7 @@ HASH IntegerObject_Hash(BaseObject * self_tmp){
 
 BaseObject * IntegerObject_UnaryNegate(BaseObject * self_tmp){
 	if(!OBJCHECKTYPE(self_tmp,"integer")){
-		//exception handler
+		RAISE(ExceptionObject_FromCHARPNT("TypeError. wrong function."));
 	}
 	IntegerObject * self = (IntegerObject *)self_tmp; 
 	IntegerObject * new = IntegerObject_Init();
@@ -118,7 +115,7 @@ BaseObject * IntegerObject_UnaryNegate(BaseObject * self_tmp){
 
 BaseObject * IntegerObject_UnaryBool(BaseObject * self_tmp){
 	if(!OBJCHECKTYPE(self_tmp,"integer")){
-		//exception handler
+		RAISE(ExceptionObject_FromCHARPNT("TypeError. wrong function."));
 	}
 	IntegerObject * self = (IntegerObject *)self_tmp;
 	if(self->value == 0){
@@ -147,8 +144,10 @@ long IntegerObject_Tolong(BaseObject * o_tmp){
 
 
 void IntegerObject_DESTRUCT(BaseObject * self_tmp){
+	if(self_tmp == NULL){
+		return;
+	}
 	IntegerObject * self = (IntegerObject *)self_tmp;
-	printf("integer <%p> deleting itself\n",self_tmp);
 	free(self);
 }
 
@@ -223,6 +222,7 @@ TypeObject IntegerType = {
 	&IntegerObject_Repr,							//repr
 };
 
+
 IntegerObject * IntegerObject_Init(){
 	IntegerObject * a = malloc(sizeof(IntegerObject));
 	
@@ -231,5 +231,6 @@ IntegerObject * IntegerObject_Init(){
 		0,
 		1
 	};
+	Fox_Initialize_Object((BaseObject *)a);
 	return a;
 }

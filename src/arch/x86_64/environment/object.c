@@ -35,11 +35,15 @@ TypeObject VarBaseObjectType = {
 };
 
 char * BaseObject_Repr_CHARPNT(BaseObject * self){
-	return StringObject_Str_CHARPNT(BaseObject_Repr(self));
+	BaseObject * res = BaseObject_Repr(self);
+	char * str = StringObject_Str_CHARPNT(res);
+	BaseObject_Dealloc(res);
+	return str;
 }
 
 BaseObject * BaseObject_Repr(BaseObject * self){
 	if(self == NULL){
+		printf("hey");
 		return NULL;
 	}
 	if(OBJTYPE(self)->reprfunction == NULL){
@@ -147,4 +151,10 @@ HASH BaseObject_Hash_HASH(BaseObject * self){
 
 BaseObject * BaseObject_Hash(BaseObject * self){
 	return (BaseObject *)IntegerObject_Fromlong(BaseObject_Hash_HASH(self));
+}
+
+void BaseObject_PRINTFUNC(BaseObject * self){
+	char * res = BaseObject_Repr_CHARPNT(self);
+	printf("%s\n",res);
+	free(res);
 }

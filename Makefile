@@ -15,11 +15,11 @@ CFLAGS += $(foreach dir, $(includedirs), -I./$(dir))
 CPPFLAGS += $(foreach dir, $(includedirs), -I./$(dir))
 LDFLAGS =
 
-assembly_source_files := $(foreach dir,$(dirs),$(wildcard $(dir)*.asm))
+assembly_source_files := $(foreach dir,$(dirs),$(wildcard $(dir)/*.asm))
 assembly_object_files := $(patsubst src/arch/$(arch)%.asm, \
     build/arch/$(arch)%.o, $(assembly_source_files))
 
-c_source_files := $(foreach dir,$(dirs),$(wildcard $(dir)*.c))
+c_source_files := $(foreach dir,$(dirs),$(wildcard $(dir)/*.c))
 c_object_files := $(patsubst src/arch/$(arch)%.c, \
     build/arch/$(arch)%.o, $(c_source_files))
 
@@ -36,12 +36,14 @@ install:
 	sudo apt-get install aptitude -y
 	aptitude search boost
 
-	sudo apt-get install nasm
+	sudo apt-get install nasm gcc valgrind gdb -y
 
 
 debug: $(executable)
 	gdb $(executable)
 
+memleak: $(executable)
+	valgrind --leak-check=yes $(executable)
 
 clean:
 	@rm -r build
