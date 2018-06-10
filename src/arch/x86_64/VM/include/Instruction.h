@@ -25,9 +25,18 @@ typedef enum {
 	LDV, //load variable
 	STV, //store variable
 
+	//IO
+	PRNT,
+
 }InstructionID;
 
 #define addcase(x) case x:return #x
+
+#define SPUSH(x,y) x->stack[(x->stacksize)++]=y
+#define SPOP(x) x->stack[--(x->stacksize)]
+#define STOP(x) x->stack[x->stacksize-1]
+#define STOPX(x,y) x->stack[x->stacksize-(1+y)]
+
 
 inline char * id_to_instruction(InstructionID id){
 	switch(id){
@@ -45,6 +54,10 @@ inline char * id_to_instruction(InstructionID id){
 		addcase(ROT3);
 		addcase(ROT4);
 		addcase(DUP);
+		addcase(PRNT);
+		addcase(LDC);
+		addcase(STV);
+		addcase(LDV);
 		default:return "NOP";
 	}
 }
@@ -68,7 +81,13 @@ typedef struct instruction{
 typedef struct frame{
 	instruction * start;
 	BaseObject ** callstack;
+	int callstacksize;
+	int callstackfilled;
 	BaseObject ** stack;
+	int stacksize;
+	int stackfilled;
+
+	BaseObject ** constants;
 }frame;
 
 instruction * execute_one(instruction * i, frame * f);
@@ -78,10 +97,14 @@ frame * execute_frames(frame * f);
 instruction * execute(instruction * i, frame * f);
 
 
-instruction * add_instruction_after_prev(InstructionID id);
-instruction * add_instruction_after(InstructionID id,instruction * last);
+instruction * add_instruction_after_prev(InstructionID id,int arg);
+instruction * add_instruction_after(InstructionID id,int arg,instruction * last);
 instruction * instruction_init(InstructionID id);
 void instruction_DESTRUCT(instruction * i);
 void instruction_DESTRUCT_Recursive(instruction * i);
+
+frame * frame_init();
+void frame_DESTRUCT_Recursive(frame * i);
+void frame_DESTRUCT(frame * i);
 
 #endif

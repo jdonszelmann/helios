@@ -59,6 +59,9 @@ void BaseObject_Dealloc(BaseObject * o){
 		return;
 	}
 	TypeObject * t = OBJTYPE(o);
+	#if DEBUGDEALLOC
+	printf("deallocating %s at %p\n",OBJTYPE(o)->typename,o);
+	#endif
 	if(t == NULL){
 		free(o);
 	}else{

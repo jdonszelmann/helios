@@ -28,6 +28,9 @@ void * dbg_malloc(int size,int line,const char * file, const char * func){
 
 
 void dbg_free(void * orig,int line,const char * file, const char * func){
+	if(orig == NULL){
+		return;
+	}
 	frees++;
 	total--;
 	printf ("%i: Freed = %s, %d, %s, %p\n",total, file, line, func, orig);

@@ -20,8 +20,11 @@ void ExceptionObject_DESTRUCT(BaseObject * self_tmp);
 TypeObject ExceptionType;
 
 BaseObject * ExceptionObject_FromCHARPNT(char * value);
+BaseObject * ExceptionObject_FromCHARPNT_FMT(char * value,...);
 BaseObject * ExceptionObject_FromString(BaseObject * o);
 char * ExceptionObject_ToCHARPNT(BaseObject * o);
 BaseObject * ExceptionObject_ToString(BaseObject * o);
+
+
 
 #endif

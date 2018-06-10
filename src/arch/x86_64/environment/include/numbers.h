@@ -2,11 +2,13 @@
 #define NUMBERS_H
 #include <Foxlang.h>
 
-
 typedef int (*inquiry)(struct baseobj *, struct baseobj *, struct baseobj *);
 typedef struct baseobj * (*TernaryOperator)(struct baseobj *, struct baseobj *, struct baseobj *);
 typedef struct baseobj * (*BinaryOperator)(struct baseobj *, struct baseobj *);
 typedef struct baseobj * (*UnaryOperator)(struct baseobj *);
+typedef struct baseobj * (*UnaryFunc)(struct baseobj *);
+typedef struct baseobj * (*BinaryFunc)(struct baseobj *,struct baseobj *);
+typedef struct baseobj * (*TernaryFunc)(struct baseobj *, struct baseobj *, struct baseobj *);
 
 typedef struct comparemethods{
 	BinaryOperator EQ;
@@ -63,6 +65,9 @@ typedef struct numbermethods{
 	UnaryOperator pos;
 	UnaryOperator neg;
 	UnaryOperator inv;
+
+	//conversion
+	UnaryFunc asint;
 
 }NumberMethods;
 

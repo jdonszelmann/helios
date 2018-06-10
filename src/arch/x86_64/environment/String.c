@@ -189,6 +189,7 @@ TypeObject StringType = {
 	&StringObject_DESTRUCT,							//destructor!
 	&StringObject_Compare,							//comparemethods
 	0,												//numbermethods
+	0,												//itermethods
 	&StringObject_Hash,								//hash
 	&StringObject_Repr,								//repr
 };

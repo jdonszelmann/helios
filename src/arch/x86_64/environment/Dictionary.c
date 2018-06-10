@@ -164,6 +164,7 @@ TypeObject DictionaryType = {
 	&DictionaryObject_DESTRUCT,						//destructor!
 	0,												//comparemethods
 	0,												//numbermethods
+	0,												//itermethods
 	0,												//hash
 };
 

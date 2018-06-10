@@ -20,13 +20,14 @@ COMPARISON_OPERATOR REVERSE_COMPARISON_OPERATOR[6];
 
 
 #define Object_immutable_HEAD 	Refcount object_refcount; \
-								struct typeobj * object_type;
+								struct typeobj * object_type; \
+								int _static;
 
 #define Object_mutable_HEAD 	Object_immutable_HEAD; \
 								ObjectSize object_size;
 
 #define BaseObject_HEAD_INIT(type)        \
-			1,type,
+			1,type,0,
 
 
 #define VarBaseObject_HEAD_INIT(type, size) \
@@ -38,6 +39,15 @@ COMPARISON_OPERATOR REVERSE_COMPARISON_OPERATOR[6];
 #define ITEMSIZE(o)		(OBJTYPE(o)				->item_size)
 
 struct numbermethods;
+
+typedef struct baseobj{
+	Object_immutable_HEAD;
+}BaseObject;
+
+typedef struct varbaseobj{
+	Object_mutable_HEAD;
+}VarBaseObject;
+
 
 typedef struct typeobj{
 	Object_mutable_HEAD;
@@ -53,7 +63,7 @@ typedef struct typeobj{
 	//comparemethods
 	struct comparemethods * compare;
 	struct numbermethods * number; //numbermethods
-	//sequencemethods (iterator)
+	struct itermethods * iter;
 	//methods
 	hashgenerator generate_hash; //hash
 	//call(able)
@@ -62,6 +72,7 @@ typedef struct typeobj{
 	//docstring?
 
 	//dict
+	BaseObject * __dict__;
 
 	//instance init (__init__)
 
@@ -73,30 +84,23 @@ typedef struct typeobj{
 
 }TypeObject;
 
-typedef struct baseobj{
-	Object_immutable_HEAD;
-}BaseObject;
-
-typedef struct varbaseobj{
-	Object_mutable_HEAD;
-}VarBaseObject;
 
 TypeObject BaseObjectType;
 TypeObject VarBaseObjectType;
 
 
-#define DECREF(o_tmp)									\
-		do{												\
-			BaseObject * o = (BaseObject *)o_tmp;		\
-			o->object_refcount--;						\
-			if(o->object_refcount <= 0)					\
-				BaseObject_Dealloc(o_tmp);				\
+#define DECREF(o_tmp)										\
+		do{													\
+			BaseObject * __o = (BaseObject *)o_tmp;			\
+			__o->object_refcount--;							\
+			if(__o->object_refcount <= 0 && !__o->_static)	\
+				BaseObject_Dealloc(o_tmp);					\
 		}while(0)
 
 #define INCREF(o_tmp)									\
 		do{												\
-			BaseObject * o = (BaseObject *)o_tmp;		\
-			o->object_refcount++;						\
+			BaseObject * __o = (BaseObject *)o_tmp;		\
+			__o->object_refcount++;						\
 		}while(0)
 
 // int OBJCHECKTYPE(BaseObject * o, char * type);
@@ -119,5 +123,16 @@ void BaseObject_PRINTFUNC(BaseObject * self);
 
 HASH BaseObject_Hash_HASH(BaseObject * self);
 BaseObject * BaseObject_Hash(BaseObject * self);
+
+BaseObject * BaseObject_AsInteger(BaseObject * o);
+
+inline BaseObject * STATIC(BaseObject * a){
+	a->_static=1;
+	return a;
+}
+
+BaseObject * BaseObject_Iter(BaseObject * self);
+BaseObject * BaseObject_IterNext(BaseObject * self);
+BaseObject * BaseObject_IterPrev(BaseObject * self);
 
 #endif

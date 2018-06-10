@@ -4,6 +4,11 @@
 #define DEBUGMEM 0
 #define DEBUGVM 1
 
+#if DEBUGMEM
+#define DEBUGDEALLOC 1
+#else
+#define DEBUGDEALLOC 0
+#endif
 
 #include <Typedefs.h>
 
@@ -16,8 +21,12 @@
 #include <Boolean.h>
 #include <String.h>
 #include <Exception.h>
+#include <List.h>
+#include <Iterator.h>
 
 #include <Memory.h>
+
+#include <Default.h>
 
 #include <env.h>
 
@@ -25,6 +34,7 @@
 #include <debug.h>
 #endif
 
+#include <tokenizer.h>
 #include <VM.h>
 
 #endif

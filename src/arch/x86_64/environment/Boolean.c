@@ -30,6 +30,7 @@ TypeObject BooleanType = {
 	&IntegerObject_DESTRUCT,						//destructor!	!CURRENTLY IMPLEMENTED AS INTEGER!
 	0,												//comparemethods
 	&IntegerObject_NumberMethods,					//numbermethods !CURRENTLY IMPLEMENTED AS INTEGER!
+	0,												//itermethods
 	0,												//hash
 	&BooleanObject_Repr,							//repr
 };

@@ -9,7 +9,6 @@ typedef struct{
 }StringObject;
 
 StringObject * StringObject_Init();
-StringObject * StringObject_Init_NOAUTODEL();
 BaseObject * StringObject_Repr(BaseObject * o_tmp);
 char * StringObject_Repr_CHARPNT(BaseObject * o_tmp);
 BaseObject * StringObject_Str(BaseObject * o_tmp);

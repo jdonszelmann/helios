@@ -218,6 +218,7 @@ TypeObject IntegerType = {
 	&IntegerObject_DESTRUCT,						//destructor!
 	&IntegerObject_Compare,							//comparemethods
 	&IntegerObject_NumberMethods,					//numbermethods
+	0,												//itermethods
 	&IntegerObject_Hash,							//hash
 	&IntegerObject_Repr,							//repr
 };

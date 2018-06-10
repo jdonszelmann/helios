@@ -158,3 +158,31 @@ void BaseObject_PRINTFUNC(BaseObject * self){
 	printf("%s\n",res);
 	free(res);
 }
+
+BaseObject * BaseObject_AsInteger(BaseObject * o){
+	if(OBJTYPE(o)->number != NULL && OBJTYPE(o)->number->asint != NULL){
+		return OBJTYPE(o)->number->asint(o);
+	}
+	RAISE(ExceptionObject_FromCHARPNT_FMT("ValueError, cant convert %s to int",OBJTYPE(o)->typename));
+}
+
+BaseObject * BaseObject_Iter(BaseObject * self){
+	if(OBJTYPE(self)->iter != NULL && OBJTYPE(self)->iter->iter != NULL){
+		return OBJTYPE(self)->iter->iter(self);
+	}
+	RAISE(ExceptionObject_FromCHARPNT("TypeError. Cant iterate over object."));
+}
+
+BaseObject * BaseObject_IterNext(BaseObject * self){
+	if(OBJCHECKTYPE(self,"Iterator")){
+		return OBJTYPE(self)->iter->iternext(self);
+	}	
+	RAISE(ExceptionObject_FromCHARPNT("TypeError. can only call next on iterator."));
+}
+
+BaseObject * BaseObject_IterPrev(BaseObject * self){
+	if(OBJCHECKTYPE(self,"Iterator")){
+		return OBJTYPE(self)->iter->iterprev(self);
+	}	
+	RAISE(ExceptionObject_FromCHARPNT("TypeError. can only call prev on iterator."));
+}

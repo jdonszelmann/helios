@@ -335,6 +335,7 @@ TypeObject LongType = {
 	&LongObject_DESTRUCT,						//destructor!
 	&LongObject_Compare,						//comparemethods
 	&LongObject_NumberMethods,					//numbermethods
+	0,											//itermethods
 	&LongObject_Hash,							//hash
 	&LongObject_Repr,							//repr
 };

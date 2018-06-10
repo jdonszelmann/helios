@@ -8,13 +8,52 @@
 
 int main(int argc, char *argv[]){
 
-	instruction * start = add_instruction_after_prev(NOP);
-	add_instruction_after_prev(NOP);
-	add_instruction_after_prev(STP);
-	
-	execute(start,NULL);
+	tokenize("a = \"hello world\"");
 
-	instruction_DESTRUCT_Recursive(start);
+
+	// BaseObject * list = ListObject_FromVARG(2,IntegerObject_Fromstring("390"),IntegerObject_Fromstring("320"));
+	// BaseObject_PRINTFUNC(list);
+	// BaseObject * iterator = BaseObject_Iter(list);
+
+
+	
+	// BaseObject * next = BaseObject_IterNext(iterator);
+	// BaseObject_PRINTFUNC(next);
+	// DECREF(next);
+
+	// BaseObject * next1 = BaseObject_IterNext(iterator);
+	// BaseObject_PRINTFUNC(next1);
+	
+	// DECREF(next1);
+
+	// DECREF(iterator);
+	// DECREF(list);
+
+	// frame * f = frame_init();
+
+
+	// instruction * start = add_instruction_after_prev(NOP,0);
+	// add_instruction_after_prev(LDC,0);
+	// add_instruction_after_prev(PRNT,0);
+	// add_instruction_after_prev(LDC,1);
+	// add_instruction_after_prev(PRNT,0);
+	// add_instruction_after_prev(ADD,0);
+	// add_instruction_after_prev(PRNT,0);
+
+	// add_instruction_after_prev(PRNT,0);
+
+	// add_instruction_after_prev(STP,0);
+	
+
+	// f->constants = (BaseObject *[]){
+	// 	STATIC(IntegerObject_Fromstring("390")),
+	// 	STATIC(IntegerObject_Fromstring("320")),
+	// };
+
+	// f->start = start;
+	// execute_frame(f);
+
+	// frame_DESTRUCT_Recursive(f);
 
 	// Fox_Clean_Init();
 
