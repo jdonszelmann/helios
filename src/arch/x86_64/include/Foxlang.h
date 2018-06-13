@@ -3,6 +3,9 @@
 
 #define DEBUGMEM 0
 #define DEBUGVM 1
+#define DEBUGTOKENIZER 0
+
+#define AST_LARGE 0
 
 #if DEBUGMEM
 #define DEBUGDEALLOC 1
@@ -35,6 +38,9 @@
 #endif
 
 #include <tokenizer.h>
-#include <VM.h>
+#include <ast.h>
+#include <parser.h>
+
+#include <Instruction.h>
 
 #endif

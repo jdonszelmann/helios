@@ -8,7 +8,35 @@
 
 int main(int argc, char *argv[]){
 
-	tokenize("a = \"hello world\"");
+	if(argc<2){
+		RAISE(ExceptionObject_FromCHARPNT_FMT("ValueError: expected filename to run"));
+	}else{
+		FILE * fp;
+		fp = fopen(argv[1],"r");
+		if(!fp){
+			printf("File opening failed\n");
+			return 0;
+		}
+		fseek(fp, 0, SEEK_END);
+		unsigned long size = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+		char * buf = malloc(size);
+		int tmp = fread(buf,1,size,fp);
+		if(!tmp){
+			printf("Couldnt read file\n");
+			return 0;
+		}
+		fclose(fp);
+
+		Token * t = fox_tokenize(buf);
+		fox_parse(t,buf);
+		freetokenarr(t);
+
+		free(buf);
+	}
+
+	// tokenize("a = \"hello world\" if a > 3 else \"hey\"\n\n\n");
+	// tokenize("b /= #comment# 0x02");
 
 
 	// BaseObject * list = ListObject_FromVARG(2,IntegerObject_Fromstring("390"),IntegerObject_Fromstring("320"));

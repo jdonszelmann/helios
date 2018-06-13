@@ -18,7 +18,7 @@ instruction * execute_one(instruction * i, frame * f){
 	}
 	BaseObject * a;
 	BaseObject * b;
-	BaseObject * c;
+	// BaseObject * c;
 
 	switch(i->id){
 		case NOP:

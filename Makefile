@@ -5,11 +5,11 @@ executable := build/$(arch)
 
 dirs = $(shell find src/arch/$(arch)/ -type d -print)
 includedirs :=  $(sort $(foreach dir, $(foreach dir1, $(dirs), $(shell dirname $(dir1))), $(wildcard $(dir)/include)))
-testfile = 
+testfile = test.fox
 
 linker = gcc
 
-CFLAGS = -Wall -cpp -O3
+CFLAGS = -Wall -cpp -O3 -g
 CPPFLAGS = -Wall -c --std=c++11
 CFLAGS += $(foreach dir, $(includedirs), -I./$(dir))
 CPPFLAGS += $(foreach dir, $(includedirs), -I./$(dir))
@@ -40,10 +40,10 @@ install:
 
 
 debug: $(executable)
-	gdb $(executable)
+	gdb --args $(executable) $(testfile)
 
 memleak: $(executable)
-	valgrind --leak-check=yes $(executable)
+	valgrind --leak-check=yes $(executable) $(testfile)
 
 clean:
 	@rm -r build

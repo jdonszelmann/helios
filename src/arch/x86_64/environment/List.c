@@ -198,7 +198,7 @@ BaseObject * ListObject_iternext(BaseObject * iterator){
 }
 
 BaseObject * ListObject_iterprev(BaseObject * self_tmp){
-
+	return NULL;
 }
 
 BaseObject * ListObject_GetItemAtint(BaseObject * self_tmp,int index){
@@ -207,7 +207,8 @@ BaseObject * ListObject_GetItemAtint(BaseObject * self_tmp,int index){
 }
 
 BaseObject * ListObject_GetItemAt(BaseObject * self_tmp,BaseObject * index){
-	ListObject * self = (ListObject *)self_tmp;
+	// ListObject * self = (ListObject *)self_tmp;
+	return NULL;
 }
 
 
